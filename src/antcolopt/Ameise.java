@@ -2,16 +2,26 @@ package antcolopt;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+
+import javax.swing.text.ElementIterator;
 
 public class Ameise {
 
 	int[] besuchteKnoten = new int[Problem.anzahlJobs];
-	ArrayList<Integer> erlaubteKnoten = new ArrayList<Integer>();
+	List<Integer> erlaubteKnoten = new ArrayList<Integer>();
 	int aktuellePosition;
+	private List<Integer> nachbarschaft = new ArrayList<Integer>();
+	private int nachbarschaftsgroesse = 5;
+	private Loesung eliteLoesung;
 
 	double[] wahrscheinlichkeiten = new double[Problem.anzahlJobs];
 
-	public Ameise() {
+	public Ameise(Loesung eliteloesung) {
+		for (int i = 0; i < nachbarschaftsgroesse; i++) {
+			nachbarschaft.add(eliteloesung.getJobreihenfolge()[i]);
+		}
+		eliteLoesung = eliteloesung;
 		for (int i = 0; i < Problem.anzahlJobs; i++) {
 			erlaubteKnoten.add(i);
 		}
@@ -20,34 +30,89 @@ public class Ameise {
 	}
 
 	public void updateWahrscheinlichkeiten(double[][] matrix) {
-		
 
-		double summeAlleKanten = 0;
-		for (int i = 0; i < Problem.anzahlJobs; i++) {
-			if (erlaubteKnoten.contains(i)) {
-				summeAlleKanten += matrix[aktuellePosition][i]
-						* Math.pow((1.0 / Problem.gesamtBearbeitungsZeitJobs[i]), Problem.beta);
+		if (Problem.nachbarschaftsregel == true) {
+
+			double summeAlleKanten = 0;
+			for (Integer knotenInNachbarschaft : nachbarschaft) {
+				summeAlleKanten += matrix[aktuellePosition][knotenInNachbarschaft]
+						* Math.pow((1.0 / Problem.gesamtBearbeitungsZeitJobs[knotenInNachbarschaft]), Problem.beta);
 			}
-		}
-			
+			for (Integer knotenInNachbarschaft : nachbarschaft) {
 
+				wahrscheinlichkeiten[knotenInNachbarschaft] = Math
+						.pow((matrix[aktuellePosition][knotenInNachbarschaft]), Problem.alpha)
+						* Math.pow((1.0 / Problem.gesamtBearbeitungsZeitJobs[knotenInNachbarschaft]), Problem.beta)
+						/ summeAlleKanten;
 
-
-		// System.out.println("Summe alle Kanten: " + summeAlleKanten);
-
-		for (int i = 0; i < Problem.anzahlJobs; i++) {
-			if (erlaubteKnoten.contains(i)) {
-				wahrscheinlichkeiten[i] = Math.pow((matrix[aktuellePosition][i]), Problem.alpha)
-						* Math.pow((1.0 / Problem.gesamtBearbeitungsZeitJobs[i]), Problem.beta) / summeAlleKanten;
-			} else {
-				wahrscheinlichkeiten[i] = 0;
 			}
+
 		}
 
+		else {
+
+			double summeAlleKanten = 0;
+			for (int i = 0; i < Problem.anzahlJobs; i++) {
+				if (erlaubteKnoten.contains(i)) {
+					summeAlleKanten += matrix[aktuellePosition][i]
+							* Math.pow((1.0 / Problem.gesamtBearbeitungsZeitJobs[i]), Problem.beta);
+				}
+			}
+
+			// System.out.println("Summe alle Kanten: " + summeAlleKanten);
+
+			for (int i = 0; i < Problem.anzahlJobs; i++) {
+				if (erlaubteKnoten.contains(i)) {
+					wahrscheinlichkeiten[i] = Math.pow((matrix[aktuellePosition][i]), Problem.alpha)
+							* Math.pow((1.0 / Problem.gesamtBearbeitungsZeitJobs[i]), Problem.beta) / summeAlleKanten;
+				} else {
+					wahrscheinlichkeiten[i] = 0;
+				}
+			}
+
+		}
 	}
 
-	public int naechsterKnoten(double[][] matrix) {
-		Collections.sort(erlaubteKnoten);
+	public void bestimmeNachbarschaft() {
+nachbarschaft = new ArrayList<Integer>();
+		for (int job : eliteLoesung.getJobreihenfolge()) {
+			if (erlaubteKnoten.contains(job)) {
+				nachbarschaft.add(job);
+				if (nachbarschaft.size() >= nachbarschaftsgroesse) {
+					break;
+				}
+			}
+		}
+	}
+
+	public void naechsterKnoten(double[][] matrix) {
+
+		if (Problem.nachbarschaftsregel == true) {
+			// System.out.println(knoten);
+			updateWahrscheinlichkeiten(matrix);
+			double summe = 0;
+			double zufallszahl = Math.random();
+			// System.out.println("zufallszahl: " + zufallszahl);
+			for (Integer knotenInNachbarschaft:nachbarschaft) {
+				// System.out.println("wahrscheinlichkeit: " +
+				// wahrscheinlichkeiten[erlaubteKnoten.get(i)]);
+				summe += wahrscheinlichkeiten[knotenInNachbarschaft];
+				if (zufallszahl < summe) {
+					int ergebnis = knotenInNachbarschaft;
+					erlaubteKnoten.remove((Integer) knotenInNachbarschaft);
+					besuchteKnoten[aktuellePosition] = ergebnis;
+					nachbarschaft.remove((Integer) knotenInNachbarschaft);
+					if(aktuellePosition<(Problem.anzahlJobs-nachbarschaftsgroesse))
+					{nachbarschaft.add(eliteLoesung.getJobreihenfolge()[aktuellePosition+nachbarschaftsgroesse]);
+					}
+					aktuellePosition++;
+					return;
+				}
+			}
+		}
+		else {
+
+		// Collections.sort(erlaubteKnoten);
 		updateWahrscheinlichkeiten(matrix);
 		// System.out.println(toString());
 		for (Object knoten : erlaubteKnoten) {
@@ -65,12 +130,11 @@ public class Ameise {
 					besuchteKnoten[aktuellePosition] = ergebnis;
 
 					aktuellePosition++;
-					return ergebnis;
+					return;
 				}
 			}
-		}
-
-		return erlaubteKnoten.get(erlaubteKnoten.size() - 1);
+		}}
+		
 
 	}
 
@@ -82,7 +146,7 @@ public class Ameise {
 		this.besuchteKnoten = besuchteKnoten;
 	}
 
-	public ArrayList<Integer> getErlaubteKnoten() {
+	public List<Integer> getErlaubteKnoten() {
 		return erlaubteKnoten;
 	}
 

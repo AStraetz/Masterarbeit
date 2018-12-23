@@ -24,22 +24,29 @@ public class Main {
 			FileWriter fw = new FileWriter("D:\\QuickB3n\\logs\\ausgabe.txt" );
 			BufferedWriter bw = new BufferedWriter(fw);
 			for(int l =0;l<10;l++) {
+				Problem.generiereTftHeristikLoesung();
 				Population population = new Population();
 				final long timeStart = System.currentTimeMillis();
-			for (int i = 0; i < 300; i++) {
+			for (int i = 0; i < 500; i++) {
+				
 				
 				population.generiereLoesung();
 				final long timeEnd = System.currentTimeMillis();
 				bw.write(population.getIterationsanzahl() + "; " + (timeEnd - timeStart) + "; "
 						+ population.getEliteloesung().berechneTFT());
 				bw.write("\n");
-				if((timeEnd - timeStart) > 600000) {
+				if((timeEnd - timeStart) > 75000) {
+					
 					String s = "";
 					for (int k = 0; k < Problem.anzahlJobs; k++) {
 						s += population.getEliteloesung().getJobreihenfolge()[k] + ", ";
 					}
 					bw.write(s);
 					break;}
+
+				
+				
+				
 			}
 			bw.write("\n");
 			

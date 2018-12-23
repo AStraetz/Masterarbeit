@@ -31,19 +31,29 @@ public class Population {
 	
 
 	public Population() {
+		
+		//eliteloesung = new Loesung(0);
 		for (int i = 0; i < Problem.anzahlJobs; i++) {
 			for (int j = 0; j < Problem.anzahlJobs; j++) {
 				pheromonmatrix[i][j] = (double) 1 / (Problem.anzahlJobs);
 				
 				
 			}
+		}
 			for (int k = 0; k < Problem.anzahlJobs; k++) {
+			//	eliteloesung.getJobreihenfolge()[k]=k;
 				list.add(k);
 				list2.add(k);
 			}
 			java.util.Collections.shuffle(list);			
 			java.util.Collections.shuffle(list2);
-		}
+			eliteloesung = Problem.generiereTftHeristikLoesung();
+			Loesung[] loesungArray = new Loesung[1];
+			loesungArray[0] = eliteloesung;
+			wendeLokaleSucheAn(loesungArray, 3);
+			eliteloesung = loesungArray[0];
+			System.out.println(toString());
+		
 	}
 
 	public String toString() {
@@ -64,7 +74,7 @@ public class Population {
 			s += "\n";
 			for (int i = 0; i < besteLoesungIteration.getJobreihenfolge().length; i++) {
 				s += besteLoesungIteration.getJobreihenfolge()[i] + ", ";
-			}
+			}}
 			s += "\n";
 			s += "beste Lösung: " + eliteloesung.berechneTFT();
 			s += "\n";
@@ -72,7 +82,7 @@ public class Population {
 				s += eliteloesung.getJobreihenfolge()[i] + ", ";
 			}
 			s += "   Alter: " + eliteloesung.getAlter();
-		}
+		
 
 		s += "\n Anzahl Loesungen: " + anzahlLoesungen;
 		s += "\n";
@@ -180,7 +190,7 @@ public class Population {
 		Ameise[] ameisen = new Ameise[Problem.anzahlAmeisen];
 		Loesung[] loesungen = new Loesung[Problem.anzahlAmeisen];
 		for (int i = 0; i < Problem.anzahlAmeisen; i++) {
-			ameisen[i] = new Ameise();
+			ameisen[i] = new Ameise(eliteloesung);
 			loesungen[i] = new Loesung(iterationsanzahl);
 		}
 
@@ -199,24 +209,7 @@ public class Population {
 		if(Problem.lokaleSuche == true) {
 			
 			
-			for(int l=0;l<3;l++ ) {
-			for (int i = 0; i < loesungen.length; i++) {
-				for (int j = 0; j <Problem.anzahlJobs; j++) {
-					//int zufall = (int) (Problem.anzahlJobs * Math.random());
-					
-				 loesungen[i] = lokaleSucheInsertion(loesungen[i], list.get(j));
-				// zufall = (int) (Problem.anzahlJobs * Math.random());
-				 loesungen[i] = swapSearch(loesungen[i], list2.get(j));
-				}
-				java.util.Collections.shuffle(list);
-				java.util.Collections.shuffle(list2);
-			//	for (int j = 0; j <10; j++) {
-				//	int zufall = (int) (Problem.anzahlJobs * Math.random());
-			//	loesungen[i] = swapSearch(loesungen[i], zufall);
-			//	zufall = (int) (Problem.anzahlJobs * Math.random());
-			//	}
-			}
-		}
+			wendeLokaleSucheAn(loesungen,3);
 		}
 
 		int besteLoesung = ermittleBesteLoesung(loesungen);
@@ -260,6 +253,27 @@ public class Population {
 		System.out.println(toString());
 		iterationsanzahl++;
 		return eliteloesung;
+	}
+
+	private void wendeLokaleSucheAn(Loesung[] loesungen, int k) {
+		for(int l=0;l<k;l++ ) {
+		for (int i = 0; i < loesungen.length; i++) {
+			for (int j = 0; j <Problem.anzahlJobs; j++) {
+				//int zufall = (int) (Problem.anzahlJobs * Math.random());
+				
+			 loesungen[i] = lokaleSucheInsertion(loesungen[i], list.get(j));
+			// zufall = (int) (Problem.anzahlJobs * Math.random());
+			 loesungen[i] = swapSearch(loesungen[i], list2.get(j));
+			}
+			java.util.Collections.shuffle(list);
+			java.util.Collections.shuffle(list2);
+		//	for (int j = 0; j <10; j++) {
+			//	int zufall = (int) (Problem.anzahlJobs * Math.random());
+		//	loesungen[i] = swapSearch(loesungen[i], zufall);
+		//	zufall = (int) (Problem.anzahlJobs * Math.random());
+		//	}
+		}
+}
 	}
 
 	public Loesung lokaleSucheInsertion(Loesung loesung, int index) {

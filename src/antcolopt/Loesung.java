@@ -19,7 +19,7 @@ public class Loesung {
 		int[][] ausfuehrungszeiten = problem.getAusfuehrungszeiten();
 		int tft = 0;
 		
-		int[][] leavingTime = new int[Problem.anzahlMaschinen][Problem.anzahlJobs];
+		int[][] leavingTime = new int[Problem.anzahlMaschinen][jobreihenfolge.length];
 		leavingTime[0][0] = ausfuehrungszeiten[0][jobreihenfolge[0]];
 
 // leavingTimes für Job 1
@@ -30,7 +30,7 @@ public class Loesung {
 		}
 
 //leavingTimes für Maschine 1
-		for (int j = 1; j < Problem.wartekapazitaet + 1; j++) {
+		for (int j = 1; j < Math.min(Problem.wartekapazitaet + 1,jobreihenfolge.length); j++) {
 
 			leavingTime[0][j] = leavingTime[0][j - 1] + ausfuehrungszeiten[0][jobreihenfolge[j]];
 
@@ -44,7 +44,7 @@ public class Loesung {
 
 		for (int i = 1; i < leavingTime.length - 1; i++) {
 
-			for (int j = 1; j < Problem.wartekapazitaet + 1; j++) {
+			for (int j = 1; j < Math.min(Problem.wartekapazitaet + 1,jobreihenfolge.length); j++) {
 
 				leavingTime[i][j] = Math.max(leavingTime[i][j - 1], leavingTime[i - 1][j])
 						+ ausfuehrungszeiten[i][jobreihenfolge[j]];

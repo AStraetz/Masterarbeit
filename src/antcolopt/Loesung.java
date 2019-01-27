@@ -99,6 +99,9 @@ public class Loesung {
 		return tft;
 
 	}
+	
+	
+
 
 	public int[] getJobreihenfolge() {
 		return jobreihenfolge;

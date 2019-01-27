@@ -12,7 +12,7 @@ public class Ameise {
 	List<Integer> erlaubteKnoten = new ArrayList<Integer>();
 	int aktuellePosition;
 	private List<Integer> nachbarschaft = new ArrayList<Integer>();
-	private int nachbarschaftsgroesse = 5;
+	private int nachbarschaftsgroesse = Problem.nachbarschaftsGroesse;
 	private Loesung eliteLoesung;
 
 	double[] wahrscheinlichkeiten = new double[Problem.anzahlJobs];
@@ -74,7 +74,7 @@ public class Ameise {
 	}
 
 	public void bestimmeNachbarschaft() {
-nachbarschaft = new ArrayList<Integer>();
+		nachbarschaft = new ArrayList<Integer>();
 		for (int job : eliteLoesung.getJobreihenfolge()) {
 			if (erlaubteKnoten.contains(job)) {
 				nachbarschaft.add(job);
@@ -87,13 +87,39 @@ nachbarschaft = new ArrayList<Integer>();
 
 	public void naechsterKnoten(double[][] matrix) {
 
+		if (Problem.benutzeq0 == true) {
+
+			double random = Math.random();
+			if (random < Problem.q0) {
+				double maximalerPheromonwert = 0;
+				int knotenMitMaximalemPheromonwert = -99;
+				for (int knoten : nachbarschaft) {
+					if (matrix[aktuellePosition][knoten] > maximalerPheromonwert) {
+						maximalerPheromonwert = matrix[aktuellePosition][knoten];
+						knotenMitMaximalemPheromonwert = knoten;
+					}
+				}
+
+				int ergebnis = knotenMitMaximalemPheromonwert;
+				erlaubteKnoten.remove((Integer) ergebnis);
+				besuchteKnoten[aktuellePosition] = ergebnis;
+				nachbarschaft.remove((Integer) ergebnis);
+				if (aktuellePosition < (Problem.anzahlJobs - nachbarschaftsgroesse)) {
+					nachbarschaft.add(eliteLoesung.getJobreihenfolge()[aktuellePosition + nachbarschaftsgroesse]);
+				}
+				aktuellePosition++;
+				return;
+
+			}
+		}
+
 		if (Problem.nachbarschaftsregel == true) {
 			// System.out.println(knoten);
 			updateWahrscheinlichkeiten(matrix);
 			double summe = 0;
 			double zufallszahl = Math.random();
 			// System.out.println("zufallszahl: " + zufallszahl);
-			for (Integer knotenInNachbarschaft:nachbarschaft) {
+			for (Integer knotenInNachbarschaft : nachbarschaft) {
 				// System.out.println("wahrscheinlichkeit: " +
 				// wahrscheinlichkeiten[erlaubteKnoten.get(i)]);
 				summe += wahrscheinlichkeiten[knotenInNachbarschaft];
@@ -102,39 +128,38 @@ nachbarschaft = new ArrayList<Integer>();
 					erlaubteKnoten.remove((Integer) knotenInNachbarschaft);
 					besuchteKnoten[aktuellePosition] = ergebnis;
 					nachbarschaft.remove((Integer) knotenInNachbarschaft);
-					if(aktuellePosition<(Problem.anzahlJobs-nachbarschaftsgroesse))
-					{nachbarschaft.add(eliteLoesung.getJobreihenfolge()[aktuellePosition+nachbarschaftsgroesse]);
+					if (aktuellePosition < (Problem.anzahlJobs - nachbarschaftsgroesse)) {
+						nachbarschaft.add(eliteLoesung.getJobreihenfolge()[aktuellePosition + nachbarschaftsgroesse]);
 					}
 					aktuellePosition++;
 					return;
 				}
 			}
-		}
-		else {
+		} else {
 
-		// Collections.sort(erlaubteKnoten);
-		updateWahrscheinlichkeiten(matrix);
-		// System.out.println(toString());
-		for (Object knoten : erlaubteKnoten) {
-			// System.out.println(knoten);
-			double summe = 0;
-			double zufallszahl = Math.random();
-			// System.out.println("zufallszahl: " + zufallszahl);
-			for (int i = 0; i < erlaubteKnoten.size(); i++) {
-				// System.out.println("wahrscheinlichkeit: " +
-				// wahrscheinlichkeiten[erlaubteKnoten.get(i)]);
-				summe += wahrscheinlichkeiten[erlaubteKnoten.get(i)];
-				if (zufallszahl < summe) {
-					int ergebnis = erlaubteKnoten.get(i);
-					erlaubteKnoten.remove(i);
-					besuchteKnoten[aktuellePosition] = ergebnis;
+			// Collections.sort(erlaubteKnoten);
+			updateWahrscheinlichkeiten(matrix);
+			// System.out.println(toString());
+			for (Object knoten : erlaubteKnoten) {
+				// System.out.println(knoten);
+				double summe = 0;
+				double zufallszahl = Math.random();
+				// System.out.println("zufallszahl: " + zufallszahl);
+				for (int i = 0; i < erlaubteKnoten.size(); i++) {
+					// System.out.println("wahrscheinlichkeit: " +
+					// wahrscheinlichkeiten[erlaubteKnoten.get(i)]);
+					summe += wahrscheinlichkeiten[erlaubteKnoten.get(i)];
+					if (zufallszahl < summe) {
+						int ergebnis = erlaubteKnoten.get(i);
+						erlaubteKnoten.remove(i);
+						besuchteKnoten[aktuellePosition] = ergebnis;
 
-					aktuellePosition++;
-					return;
+						aktuellePosition++;
+						return;
+					}
 				}
 			}
-		}}
-		
+		}
 
 	}
 

@@ -14,7 +14,56 @@ public class Reader {
 
 	public int[] jobZeiten = new int[Problem.anzahlJobs];
 
-	public void ladeDatei(String datName) {
+	
+	public void ladeBestwerteTFT(String datName) {
+		int problemklasse = 0;
+
+		File file = new File(datName);
+
+		if (!file.canRead() || !file.isFile())
+			System.exit(0);
+
+		BufferedReader in = null;
+		try {
+			in = new BufferedReader(new FileReader(datName));
+			String zeile = null;
+			while ((zeile = in.readLine()) != null) {
+
+				if (zeile.contains("Ta")) {
+					for (int i = 0; i < 10; i++) {
+
+						zeile = in.readLine();
+						String[] splitted = zeile.split(",");
+					
+						for (int b = 0; b < 4; b++) {
+							Problem.bestWerteTft[problemklasse][b] = Integer.parseInt(splitted[b].trim());
+							
+						}
+
+						problemklasse++;
+						// Problem.ausfuehrungszeiten0[counterInstanz][counterZeile] =
+
+					}
+					zeile = in.readLine();
+					
+				}
+
+			}
+			// System.out.println(toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (in != null)
+				try {
+					in.close();
+				} catch (IOException e) {
+				}
+		}
+	}
+
+	
+	
+	public void ladeProbleminstanzen(String datName) {
 		int counterInstanz = 0;
 		int counterZeile = 0;
 

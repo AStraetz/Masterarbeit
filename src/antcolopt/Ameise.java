@@ -8,21 +8,26 @@ import javax.swing.text.ElementIterator;
 
 public class Ameise {
 
-	int[] besuchteKnoten = new int[Problem.anzahlJobs];
+	
 	List<Integer> erlaubteKnoten = new ArrayList<Integer>();
 	int aktuellePosition;
 	private List<Integer> nachbarschaft = new ArrayList<Integer>();
 	private int nachbarschaftsgroesse = Problem.nachbarschaftsGroesse;
 	private Loesung eliteLoesung;
+	private int anzahlJobs;
+	private int anzahlMaschinen;
+	int[] besuchteKnoten = new int[anzahlJobs];
 
-	double[] wahrscheinlichkeiten = new double[Problem.anzahlJobs];
+	double[] wahrscheinlichkeiten = new double[anzahlJobs];
 
-	public Ameise(Loesung eliteloesung) {
+	public Ameise(Loesung eliteloesung, int jobAnzahl, int maschinenAnzahl) {
+		anzahlJobs = jobAnzahl;
+		anzahlMaschinen = maschinenAnzahl;
 		for (int i = 0; i < nachbarschaftsgroesse; i++) {
 			nachbarschaft.add(eliteloesung.getJobreihenfolge()[i]);
 		}
 		eliteLoesung = eliteloesung;
-		for (int i = 0; i < Problem.anzahlJobs; i++) {
+		for (int i = 0; i < anzahlJobs; i++) {
 			erlaubteKnoten.add(i);
 		}
 		aktuellePosition = 0;
@@ -52,7 +57,7 @@ public class Ameise {
 		else {
 
 			double summeAlleKanten = 0;
-			for (int i = 0; i < Problem.anzahlJobs; i++) {
+			for (int i = 0; i < anzahlJobs; i++) {
 				if (erlaubteKnoten.contains(i)) {
 					summeAlleKanten += matrix[aktuellePosition][i]
 							* Math.pow((1.0 / Problem.gesamtBearbeitungsZeitJobs[i]), Problem.beta);
@@ -61,7 +66,7 @@ public class Ameise {
 
 			// System.out.println("Summe alle Kanten: " + summeAlleKanten);
 
-			for (int i = 0; i < Problem.anzahlJobs; i++) {
+			for (int i = 0; i < anzahlJobs; i++) {
 				if (erlaubteKnoten.contains(i)) {
 					wahrscheinlichkeiten[i] = Math.pow((matrix[aktuellePosition][i]), Problem.alpha)
 							* Math.pow((1.0 / Problem.gesamtBearbeitungsZeitJobs[i]), Problem.beta) / summeAlleKanten;
@@ -104,7 +109,7 @@ public class Ameise {
 				erlaubteKnoten.remove((Integer) ergebnis);
 				besuchteKnoten[aktuellePosition] = ergebnis;
 				nachbarschaft.remove((Integer) ergebnis);
-				if (aktuellePosition < (Problem.anzahlJobs - nachbarschaftsgroesse)) {
+				if (aktuellePosition < (anzahlJobs - nachbarschaftsgroesse)) {
 					nachbarschaft.add(eliteLoesung.getJobreihenfolge()[aktuellePosition + nachbarschaftsgroesse]);
 				}
 				aktuellePosition++;
@@ -128,7 +133,7 @@ public class Ameise {
 					erlaubteKnoten.remove((Integer) knotenInNachbarschaft);
 					besuchteKnoten[aktuellePosition] = ergebnis;
 					nachbarschaft.remove((Integer) knotenInNachbarschaft);
-					if (aktuellePosition < (Problem.anzahlJobs - nachbarschaftsgroesse)) {
+					if (aktuellePosition < (anzahlJobs - nachbarschaftsgroesse)) {
 						nachbarschaft.add(eliteLoesung.getJobreihenfolge()[aktuellePosition + nachbarschaftsgroesse]);
 					}
 					aktuellePosition++;

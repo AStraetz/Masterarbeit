@@ -12,9 +12,8 @@ import java.io.IOException;
 
 public class Reader {
 
-	public int[] jobZeiten = new int[Problem.anzahlJobs];
+	private int[] jobZeiten = new int[Problem.anzahlJobs];
 
-	
 	public void ladeBestwerteTFT(String datName) {
 		int problemklasse = 0;
 
@@ -34,18 +33,17 @@ public class Reader {
 
 						zeile = in.readLine();
 						String[] splitted = zeile.split(",");
-					
+
 						for (int b = 0; b < 4; b++) {
 							Problem.bestWerteTft[problemklasse][b] = Integer.parseInt(splitted[b].trim());
-							
-						}
+							}
 
 						problemklasse++;
 						// Problem.ausfuehrungszeiten0[counterInstanz][counterZeile] =
 
 					}
 					zeile = in.readLine();
-					
+
 				}
 
 			}
@@ -61,8 +59,6 @@ public class Reader {
 		}
 	}
 
-	
-	
 	public void ladeProbleminstanzen(String datName) {
 		int counterInstanz = 0;
 		int counterZeile = 0;

@@ -21,7 +21,6 @@ public class Population {
 	int iterationsanzahl = 0;
 	int anzahlLoesungen = 0;
 	Loesung[] loesungenInPopulation = new Loesung[Problem.populationsgroesse];
-	double[][] pheromonmatrix = new double[Problem.anzahlJobs][Problem.anzahlJobs];
 	Loesung eliteloesung;
 	Loesung alteEliteLoesung;
 	Loesung besteLoesungIteration;
@@ -30,17 +29,29 @@ public class Population {
 	List<Integer> list2 = new ArrayList<Integer>();
 	int tftEliteLoesung;
 	int besterTftInPopulation;
+	private int anzahlJobs=0;
+	private int anzahlMaschinen=0;
+	public int getAnzahlMaschinen() {
+		return anzahlMaschinen;
+	}
 
-	public Population() {
+	public void setAnzahlMaschinen(int anzahlMaschinen) {
+		this.anzahlMaschinen = anzahlMaschinen;
+	}
 
+	double[][] pheromonmatrix = new double[anzahlJobs][anzahlJobs];
+
+	public Population(int jobAnzahl, int maschinenAnzahl) {
+anzahlJobs = jobAnzahl;
+anzahlMaschinen = maschinenAnzahl;
 		// eliteloesung = new Loesung(0);
-		for (int i = 0; i < Problem.anzahlJobs; i++) {
-			for (int j = 0; j < Problem.anzahlJobs; j++) {
-				pheromonmatrix[i][j] = (double) 1 / (Problem.anzahlJobs);
+		for (int i = 0; i < anzahlJobs; i++) {
+			for (int j = 0; j < anzahlJobs; j++) {
+				pheromonmatrix[i][j] = (double) 1 / (anzahlJobs);
 
 			}
 		}
-		for (int k = 0; k < Problem.anzahlJobs; k++) {
+		for (int k = 0; k < anzahlJobs; k++) {
 			// eliteloesung.getJobreihenfolge()[k]=k;
 			list.add(k);
 			list2.add(k);
@@ -55,18 +66,26 @@ public class Population {
 		tftEliteLoesung = eliteloesung.berechneTFT();
 		for (int i = 0; i < pheromonmatrix.length; i++) {
 			pheromonmatrix[i][eliteloesung.jobreihenfolge[i]] = pheromonmatrix[i][eliteloesung.jobreihenfolge[i]]
-					+ (Problem.eliteUpdateGewicht / Problem.anzahlJobs);
+					+ (Problem.eliteUpdateGewicht / anzahlJobs);
 		}
 		System.out.println(toString());
 
+	}
+
+	public int getAnzahlJobs() {
+		return anzahlJobs;
+	}
+
+	public void setAnzahlJobs(int anzahlJobs) {
+		this.anzahlJobs = anzahlJobs;
 	}
 
 	public String toString() {
 		String s = "";
 		s += "populationsgroesse: " + anzahlLoesungen + "\n";
 		s += "Pheromonmatrix: \n";
-		for (int i = 0; i < Problem.anzahlJobs; i++) {
-			for (int j = 0; j < Problem.anzahlJobs; j++) {
+		for (int i = 0; i < anzahlJobs; i++) {
+			for (int j = 0; j < anzahlJobs; j++) {
 				s += pheromonmatrix[i][j] + " ";
 			}
 
@@ -107,10 +126,10 @@ public class Population {
 	public void updateMatrix(Loesung neueLoesung, Loesung alteLoesung) {
 		for (int i = 0; i < pheromonmatrix.length; i++) {
 			pheromonmatrix[i][neueLoesung.jobreihenfolge[i]] = pheromonmatrix[i][neueLoesung.jobreihenfolge[i]]
-					+ (Problem.updategewicht / Problem.anzahlJobs);
+					+ (Problem.updategewicht / anzahlJobs);
 			if (anzahlLoesungen >= Problem.populationsgroesse) {
 				pheromonmatrix[i][alteLoesung.jobreihenfolge[i]] = pheromonmatrix[i][alteLoesung.jobreihenfolge[i]]
-						- (Problem.updategewicht / Problem.anzahlJobs);
+						- (Problem.updategewicht / anzahlJobs);
 				loesungenInPopulation[ermittleIndexAeltesteLoesung()] = neueLoesung;
 			}
 
@@ -123,10 +142,10 @@ public class Population {
 	public void updateEliteMatrix(Loesung neueLoesung, Loesung alteLoesung) {
 		for (int i = 0; i < pheromonmatrix.length; i++) {
 			pheromonmatrix[i][neueLoesung.jobreihenfolge[i]] = pheromonmatrix[i][neueLoesung.jobreihenfolge[i]]
-					+ (Problem.eliteUpdateGewicht / Problem.anzahlJobs);
+					+ (Problem.eliteUpdateGewicht / anzahlJobs);
 
 			pheromonmatrix[i][alteLoesung.jobreihenfolge[i]] = pheromonmatrix[i][alteLoesung.jobreihenfolge[i]]
-					- (Problem.eliteUpdateGewicht / Problem.anzahlJobs);
+					- (Problem.eliteUpdateGewicht / anzahlJobs);
 
 		}
 	}
@@ -155,7 +174,7 @@ public class Population {
 		return index;
 	}
 
-	public int ermittleBesteLoesung(Loesung[] loesungen) {
+	private int ermittleBesteLoesung(Loesung[] loesungen) {
 		int tft = 999999;
 		if (anzahlLoesungen > 0) {
 			tft = loesungen[0].berechneTFT();
@@ -199,13 +218,13 @@ public class Population {
 		Ameise[] ameisen = new Ameise[Problem.anzahlAmeisen];
 		Loesung[] loesungen = new Loesung[Problem.anzahlAmeisen];
 		for (int i = 0; i < Problem.anzahlAmeisen; i++) {
-			ameisen[i] = new Ameise(eliteloesung);
+			ameisen[i] = new Ameise(eliteloesung, anzahlJobs,anzahlMaschinen);
 			loesungen[i] = new Loesung(iterationsanzahl);
 		}
 
 		for (int j = 0; j < loesungen.length; j++) {
 
-			for (int i = 0; i < Problem.anzahlJobs; i++) {
+			for (int i = 0; i < anzahlJobs; i++) {
 				ameisen[j].naechsterKnoten(pheromonmatrix);
 			}
 
@@ -278,7 +297,7 @@ public class Population {
 
 	private void wendeLokaleSucheAn(Loesung[] loesungen, int k) {
 		for (int l = 0; l < k; l++) {
-			if ((l % Problem.anzahlJobs == 0) && (l > 0)) {
+			if ((l % anzahlJobs == 0) && (l > 0)) {
 				java.util.Collections.shuffle(list);
 				java.util.Collections.shuffle(list2);
 			}
@@ -286,9 +305,9 @@ public class Population {
 
 				// int zufall = (int) (Problem.anzahlJobs * Math.random());
 
-				loesungen[i] = lokaleSucheInsertion(loesungen[i], list.get(l % Problem.anzahlJobs));
+				loesungen[i] = lokaleSucheInsertion(loesungen[i], list.get(l % anzahlJobs));
 				// zufall = (int) (Problem.anzahlJobs * Math.random());
-				loesungen[i] = swapSearch(loesungen[i], list2.get(l % Problem.anzahlJobs));
+				loesungen[i] = swapSearch(loesungen[i], list2.get(l % anzahlJobs));
 
 				// for (int j = 0; j <10; j++) {
 				// int zufall = (int) (Problem.anzahlJobs * Math.random());
@@ -411,7 +430,7 @@ public class Population {
 	}*/
 
 	public int findeIndexJob(Loesung loesung, int job) {
-		for (int i = 0; i < Problem.anzahlJobs; i++) {
+		for (int i = 0; i < anzahlJobs; i++) {
 			if (loesung.jobreihenfolge[i] == job) {
 				return i;
 			}
@@ -484,8 +503,8 @@ public class Population {
 		int loesungsguete = loesung.berechneTFT();
 		for(int i = 0; i<Problem.anzahlLokaleSuche;i++)
 		{
-			int jobIndex = (int) (Math.random() * Problem.anzahlJobs);
-			int insertIndex = (int) (Math.random() * Problem.anzahlJobs);
+			int jobIndex = (int) (Math.random() * anzahlJobs);
+			int insertIndex = (int) (Math.random() * anzahlJobs);
 			
 			if ( (i & 1) == 0 ) {
 			veraenderteLoesung = insertJob(loesung, jobIndex, insertIndex);}

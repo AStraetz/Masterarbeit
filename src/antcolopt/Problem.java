@@ -8,8 +8,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class Problem {
 
-	static int anzahlJobs = 100;
-	static int anzahlMaschinen = 20;
+	
 	static int anzahlAmeisen = 5;
 	static int populationsgroesse = 3;
 	static double updategewicht = 0.5;
@@ -30,7 +29,7 @@ public class Problem {
 	static int[] berechnungszeit = {3000,6000,12000,37500,75000,150000,150000,300000,600000};
 	static int[] anzahlJobsArray = {20,20,20,50,50,50,100,100,100};
 	static int[] anzahlMaschinenArray = {5,10,20,5,10,20,5,10,20};
-	static int anzahlLokaleSuche =Problem.anzahlJobs*2;
+	static int anzahlLokaleSuche = 0;
 	static double[][] bestWerteTft = new double[90][4];
 	static String dateiBewerteTft = "D:\\tailard\\Bestwerte_TFT.csv";
 	static int nachbarschaftsGroesse = 5;
@@ -112,6 +111,8 @@ public class Problem {
 		Arrays.sort(jobs);
 		return jobs;
 	}
+
+	public static final int SPALTENANZAHL_AUS_BESTWERTE_TFT = 4;
 	
 	
 

@@ -9,6 +9,15 @@ import java.util.Map;
 
 public class Main {
 
+	private static final int MAXIMALE_ANZAHL_ITERATIONEN = 10000;
+	private static final int MITTELUNG_ANZAHL = 10;
+	private static final int WARTEKAPAZITAETEN_ENDWERT = 3;
+	private static final int WARTEKAPAZITAETEN_STARTWERT = 2;
+	private static final int PROBLEMINSTANZEN_ENDWERT = 10;
+	private static final int PROBLEMINSTANZEN_STARTWERT = 5;
+	private static final int PROBLEMKLASSEN_ENDWERT = 5;
+	private static final int PROBLEMKLASSEN_STARTWERT = 0;
+
 	public static void main(String[] args) {
 		
 
@@ -19,21 +28,21 @@ public class Main {
 			FileWriter fw2 = new FileWriter("D:\\QuickB3n\\logs\\ausgabe_ergebnisse.txt");
 			BufferedWriter bw2 = new BufferedWriter(fw2);
 			int[] besteTfts = new int[10];
-			for (int y = 4; y < 5; y++) {
-				Problem.anzahlMaschinen = Problem.anzahlMaschinenArray[y];
-				System.out.println(Problem.anzahlMaschinen);
-				Problem.anzahlJobs = Problem.anzahlJobsArray[y];
-				Problem.ausfuehrungszeiten0 = new int[10][Problem.anzahlMaschinen][Problem.anzahlJobs];
-				Problem.eliteUpdateGewicht=Problem.anzahlJobs/20.0;
-				Problem.anzahlLokaleSuche = Problem.anzahlJobs*8;
+			// Problemklassen von 0-8
+			for (int y = PROBLEMKLASSEN_STARTWERT; y < PROBLEMKLASSEN_ENDWERT; y++) {
+				Problem.ausfuehrungszeiten0 = new int[10][Problem.anzahlMaschinenArray[y]][Problem.anzahlJobsArray[y]];
+				Problem.eliteUpdateGewicht=Problem.anzahlJobsArray[y]/20.0;
+				Problem.anzahlLokaleSuche = Problem.anzahlJobsArray[y]*8;
 				String dateiName = Problem.dateiname[y];
 				Reader reader = new Reader();
 				reader.ladeProbleminstanzen(dateiName);
 				reader.ladeBestwerteTFT(Problem.dateiBewerteTft);
 				Problem.berechneGesamtBearbeitungsZeitJobs();
-				for (int z = 5; z < 10; z++) {
+				// Probleminstanzen von 0-9
+				for (int z = PROBLEMINSTANZEN_STARTWERT; z < PROBLEMINSTANZEN_ENDWERT; z++) {
 					Problem.probleminstanz = z;
-					for (int j = 2; j < 3; j++) {
+					// Wartekapazitaeten von 1-4
+					for (int j = WARTEKAPAZITAETEN_STARTWERT; j < WARTEKAPAZITAETEN_ENDWERT; j++) {
 
 						Problem.wartekapazitaet = j;
 					//for(int f = 4; f<7;f++) {
@@ -42,11 +51,11 @@ public class Main {
 						//Problem.eliteUpdateGewicht =  f;
 						//for(int o = 7; o<10;o++) {
 							//	Problem.anzahlLokaleSuche = o *Problem.anzahlJobs/2;
-						for (int l = 0; l < 10; l++) {
+						for (int l = 0; l < MITTELUNG_ANZAHL; l++) {
 							Problem.generiereTftHeristikLoesung();
-							Population population = new Population();
+							Population population = new Population(Problem.anzahlJobsArray[y], Problem.anzahlMaschinenArray[y]);
 							final long timeStart = System.currentTimeMillis();
-							for (int i = 0; i < 10000; i++) {
+							for (int i = 0; i < MAXIMALE_ANZAHL_ITERATIONEN; i++) {
 								population.generiereLoesung();
 								final long timeEnd = System.currentTimeMillis();
 								bw.write(population.getIterationsanzahl() + "; " + (timeEnd - timeStart) + "; "
@@ -54,7 +63,7 @@ public class Main {
 								bw.write("\n");
 								if ((timeEnd - timeStart) > Problem.berechnungszeit[y]) {
 									String s = "";
-									for (int k = 0; k < Problem.anzahlJobs; k++) {
+									for (int k = 0; k < Problem.anzahlJobsArray[y]; k++) {
 										s += population.getEliteloesung().getJobreihenfolge()[k] + ", ";
 									}
 									bw.write(s);
@@ -70,11 +79,12 @@ public class Main {
 							summe = summe + tft;
 						}
 						
-						double gemitteltertft = (summe / 10);
+						double gemitteltertft = (summe / MITTELUNG_ANZAHL);
 						double besterBekannterTft = Problem.bestWerteTft[y*10+z][j-1];
+						// Berechnung des relative percentage deviation (RPD)
 						double rpd = ((gemitteltertft- besterBekannterTft)/besterBekannterTft) * 100;
-						bw2.write("LokaleSuche: " + Problem.anzahlLokaleSuche + " EliteGewicht: " + Problem.eliteUpdateGewicht + "gewichteter bester TFT bei Jobanzahl: " + Problem.anzahlJobs + " Maschinenanzahl: "
-								+ Problem.anzahlMaschinen + " Instanz " + (z+1) + ", Wartekapazitaet " + j + ": "
+						bw2.write("LokaleSuche: " + Problem.anzahlLokaleSuche + " EliteGewicht: " + Problem.eliteUpdateGewicht + "gewichteter bester TFT bei Jobanzahl: " + Problem.anzahlJobsArray[y] + " Maschinenanzahl: "
+								+ Problem.anzahlMaschinenArray[y] + " Instanz " + (z+1) + ", Wartekapazitaet " + j + ": "
 								+ (summe / 10) + " RPD:" + rpd +" "+ besterBekannterTft);
 						bw2.write("\n");
 						}

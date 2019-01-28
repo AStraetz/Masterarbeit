@@ -31,19 +31,42 @@ public class Population {
 	int besterTftInPopulation;
 	private int anzahlJobs=0;
 	private int anzahlMaschinen=0;
+	//Berabeitungszeit bei Probleminstanz a auf Maschine b und Job c
+	private int[][] ausfuehrungszeiten;
+	private int[][][] dueDates;
 	public int getAnzahlMaschinen() {
 		return anzahlMaschinen;
+	}
+
+	public int[][] getAusfuehrungszeiten() {
+		return ausfuehrungszeiten;
+	}
+
+	public void setAusfuehrungszeiten(int[][] ausfuehrungszeiten0) {
+		this.ausfuehrungszeiten = ausfuehrungszeiten0;
+	}
+
+	public int[][][] getDueDates() {
+		return dueDates;
+	}
+
+	public void setDueDates(int[][][] dueDates) {
+		this.dueDates = dueDates;
 	}
 
 	public void setAnzahlMaschinen(int anzahlMaschinen) {
 		this.anzahlMaschinen = anzahlMaschinen;
 	}
 
-	double[][] pheromonmatrix = new double[anzahlJobs][anzahlJobs];
+	double[][] pheromonmatrix;
 
-	public Population(int jobAnzahl, int maschinenAnzahl) {
+	public Population(int jobAnzahl, int maschinenAnzahl, int[][] ausfuehrungszeiten) {
+		
 anzahlJobs = jobAnzahl;
 anzahlMaschinen = maschinenAnzahl;
+this.ausfuehrungszeiten = ausfuehrungszeiten;
+pheromonmatrix = new double[anzahlJobs][anzahlJobs];
+dueDates = new int[9][4][anzahlJobs];
 		// eliteloesung = new Loesung(0);
 		for (int i = 0; i < anzahlJobs; i++) {
 			for (int j = 0; j < anzahlJobs; j++) {
@@ -58,7 +81,7 @@ anzahlMaschinen = maschinenAnzahl;
 		}
 		java.util.Collections.shuffle(list);
 		java.util.Collections.shuffle(list2);
-		eliteloesung = Problem.generiereTftHeristikLoesung();
+		eliteloesung = Problem.generiereTftHeristikLoesung(anzahlJobs,anzahlMaschinen, ausfuehrungszeiten);
 		Loesung[] loesungArray = new Loesung[1];
 		loesungArray[0] = eliteloesung;
 		wendeLokaleSucheAn(loesungArray, Problem.anzahlLokaleSuche);
@@ -219,7 +242,7 @@ anzahlMaschinen = maschinenAnzahl;
 		Loesung[] loesungen = new Loesung[Problem.anzahlAmeisen];
 		for (int i = 0; i < Problem.anzahlAmeisen; i++) {
 			ameisen[i] = new Ameise(eliteloesung, anzahlJobs,anzahlMaschinen);
-			loesungen[i] = new Loesung(iterationsanzahl);
+			loesungen[i] = new Loesung(iterationsanzahl,anzahlJobs,anzahlMaschinen,ausfuehrungszeiten);
 		}
 
 		for (int j = 0; j < loesungen.length; j++) {
@@ -325,7 +348,7 @@ anzahlMaschinen = maschinenAnzahl;
 		int tftTemp = 0;
 		Loesung besteLoesung = loesung;
 		
-		Loesung tempLoesung = new Loesung(loesung.getAlter());
+		Loesung tempLoesung = new Loesung(loesung.getAlter(),anzahlJobs,anzahlMaschinen,ausfuehrungszeiten);
 
 		for (int i = 0; i < loesung.getJobreihenfolge().length; i++) {
 
@@ -444,7 +467,7 @@ anzahlMaschinen = maschinenAnzahl;
 		int tftTemp = 0;
 		Loesung besteLoesung = loesung;
 		
-		Loesung tempLoesung = new Loesung(loesung.getAlter());
+		Loesung tempLoesung = new Loesung(loesung.getAlter(),anzahlJobs,anzahlMaschinen,ausfuehrungszeiten);
 
 		for (int i = 0; i < loesung.getJobreihenfolge().length; i++) {
 
@@ -462,7 +485,7 @@ anzahlMaschinen = maschinenAnzahl;
 	}
 
 	public Loesung insertJob(Loesung loesung, int jobPosition, int insertPosition) {
-		Loesung loesung2 = new Loesung(loesung.getAlter());
+		Loesung loesung2 = new Loesung(loesung.getAlter(),anzahlJobs,anzahlMaschinen,ausfuehrungszeiten);
 		loesung2.jobreihenfolge = Arrays.copyOf(loesung.getJobreihenfolge(),
 				loesung.getJobreihenfolge().length);
 		int job = loesung2.getJobreihenfolge()[jobPosition];
@@ -482,7 +505,7 @@ anzahlMaschinen = maschinenAnzahl;
 	}
 	
 	public Loesung swapJob (Loesung loesung, int swapPosition1, int swapPosition2) {
-		Loesung loesung2 = new Loesung(loesung.getAlter());
+		Loesung loesung2 = new Loesung(loesung.getAlter(),anzahlJobs,anzahlMaschinen,ausfuehrungszeiten);
 		loesung2.jobreihenfolge = Arrays.copyOf(loesung.getJobreihenfolge(),
 				loesung.getJobreihenfolge().length);
 		int job = loesung2.getJobreihenfolge()[swapPosition1];
@@ -498,7 +521,7 @@ anzahlMaschinen = maschinenAnzahl;
 	public Loesung wendeLokaleSucheAn2 (Loesung loesung) {
 	//	int jobIndexInit = (int) (Math.random() * Problem.anzahlJobs);
 		//int insertIndexInit = (int) (Math.random() * Problem.anzahlJobs);
-		Loesung veraenderteLoesung = new Loesung(loesung.getAlter());
+		Loesung veraenderteLoesung = new Loesung(loesung.getAlter(),anzahlJobs,anzahlMaschinen,ausfuehrungszeiten);
 		//veraenderteLoesung = insertJob(loesung, jobIndexInit, insertIndexInit);
 		int loesungsguete = loesung.berechneTFT();
 		for(int i = 0; i<Problem.anzahlLokaleSuche;i++)

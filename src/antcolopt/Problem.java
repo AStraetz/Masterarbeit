@@ -17,7 +17,6 @@ public class Problem {
 	static double eliteUpdateGewicht = 1;
 	static double alpha = 1.0;
 	static double beta = 0;
-	public static int[][][] ausfuehrungszeiten0 = new int[10][anzahlMaschinen][anzahlJobs];
 	static ArrayList<int[][]> problemliste = new ArrayList<int[][]>();
 	static int probleminstanz = 0;
 	static boolean lokaleSuche = true;
@@ -33,7 +32,7 @@ public class Problem {
 	static double[][] bestWerteTft = new double[90][4];
 	static String dateiBewerteTft = "D:\\tailard\\Bestwerte_TFT.csv";
 	static int nachbarschaftsGroesse = 5;
-	static int[][][] dueDates = new int[9][4][Problem.anzahlJobs];
+	
 	
 	
 
@@ -45,25 +44,25 @@ public class Problem {
 		Problem.beta = beta;
 	}
 
-	public static void berechneGesamtBearbeitungsZeitJobs() {
-		gesamtBearbeitungsZeitJobs = new double[Problem.anzahlJobs];
-		for (int i = 0; i > Problem.anzahlJobs; i++) {
+	public static void berechneGesamtBearbeitungsZeitJobs(int anzahlJobs, int anzahlMaschinen, int[][][] ausfuehrungszeiten) {
+		gesamtBearbeitungsZeitJobs = new double[anzahlJobs];
+		for (int i = 0; i > anzahlJobs; i++) {
 			gesamtBearbeitungsZeitJobs[i] = 0;
 		}
 
 		for (int i = 0; i < anzahlJobs; i++) {
 			for (int j = 0; j < anzahlMaschinen; j++) {
 				gesamtBearbeitungsZeitJobs[i] = gesamtBearbeitungsZeitJobs[i]
-						+ ausfuehrungszeiten0[probleminstanz][j][i];
+						+ ausfuehrungszeiten[probleminstanz][j][i];
 			}
 
 		}
 	}
 
-	public static Loesung generiereTftHeristikLoesung() {
-		Loesung loesung = new Loesung(0);
+	public static Loesung generiereTftHeristikLoesung(int anzahlJobs,int anzahlMaschinen, int[][] ausfuehrungszeiten) {
+		Loesung loesung = new Loesung(0,anzahlJobs,anzahlMaschinen,ausfuehrungszeiten);
 		// List<Job> jobliste = new ArrayList<Job>();
-		Job[] jobs = berechneHeuristikWerte();
+		Job[] jobs = berechneHeuristikWerte(anzahlJobs,anzahlMaschinen,ausfuehrungszeiten);
 		List<Integer> jobreihenfolge = new ArrayList<Integer>();
 		jobreihenfolge.add(jobs[0].getNummer());
 
@@ -95,7 +94,7 @@ public class Problem {
 		return loesung;
 	}
 
-	private static Job[] berechneHeuristikWerte() {
+	private static Job[] berechneHeuristikWerte(int anzahlJobs, int anzahlMaschinen, int[][] ausfuehrungszeiten) {
 		Job[] jobs = new Job[anzahlJobs];
 		for (int i = 0; i < jobs.length; i++) {
 			jobs[i] = new Job(i, 0, 0);
@@ -104,8 +103,8 @@ public class Problem {
 			jobs[i].setHeuristikwert(0);
 			for (int j = 1; j < anzahlMaschinen + 1; j++) {
 				jobs[i].setHeuristikwert(jobs[i].getHeuristikwert()
-						+ (anzahlMaschinen - j + 1) * ausfuehrungszeiten0[probleminstanz][j - 1][i]);
-				jobs[i].setHeuristikwert2(jobs[i].getHeuristikwert2() + ausfuehrungszeiten0[probleminstanz][j - 1][i]);
+						+ (anzahlMaschinen - j + 1) * ausfuehrungszeiten[j - 1][i]);
+				jobs[i].setHeuristikwert2(jobs[i].getHeuristikwert2() + ausfuehrungszeiten[j - 1][i]);
 			}
 		}
 		Arrays.sort(jobs);
@@ -115,29 +114,5 @@ public class Problem {
 	public static final int SPALTENANZAHL_AUS_BESTWERTE_TFT = 4;
 	
 	
-
-	public int getAnzahlJobs() {
-		return anzahlJobs;
-	}
-
-	public void setAnzahlJobs(int anzahlJobs) {
-		this.anzahlJobs = anzahlJobs;
-	}
-
-	public int getAnzahlMaschinen() {
-		return anzahlMaschinen;
-	}
-
-	public void setAnzahlMaschinen(int anzahlMaschinen) {
-		this.anzahlMaschinen = anzahlMaschinen;
-	}
-
-	public int[][] getAusfuehrungszeiten() {
-		return ausfuehrungszeiten0[probleminstanz];
-	}
-
-	public void setAusfuehrungszeiten(int[][] ausfuehrungszeiten) {
-		this.ausfuehrungszeiten0[probleminstanz] = ausfuehrungszeiten;
-	}
 
 }

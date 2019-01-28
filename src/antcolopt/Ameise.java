@@ -16,9 +16,9 @@ public class Ameise {
 	private Loesung eliteLoesung;
 	private int anzahlJobs;
 	private int anzahlMaschinen;
-	int[] besuchteKnoten = new int[anzahlJobs];
+	int[] besuchteKnoten;
 
-	double[] wahrscheinlichkeiten = new double[anzahlJobs];
+	double[] wahrscheinlichkeiten;
 
 	public Ameise(Loesung eliteloesung, int jobAnzahl, int maschinenAnzahl) {
 		anzahlJobs = jobAnzahl;
@@ -31,6 +31,8 @@ public class Ameise {
 			erlaubteKnoten.add(i);
 		}
 		aktuellePosition = 0;
+		besuchteKnoten = new int[anzahlJobs];
+		wahrscheinlichkeiten = new double[anzahlJobs];
 
 	}
 

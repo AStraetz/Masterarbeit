@@ -4,22 +4,27 @@ import java.util.Arrays;
 
 public class Loesung {
 
-	public Loesung(int alter) {
-		jobreihenfolge = new int[Problem.anzahlJobs];
+	public Loesung(int alter, int anzahlJobs, int anzahlMaschinen, int[][] ausfuehrungszeiten) {
+		jobreihenfolge = new int[anzahlJobs];
 		this.alter = alter;
+		this.anzahlMaschinen = anzahlMaschinen;
+		this.anzhalJobs = anzahlJobs;
+		this.ausfuehrungszeiten = ausfuehrungszeiten;
 	}
 
 	public int jobreihenfolge[];
+	private int anzhalJobs;
+	private int anzahlMaschinen;
+	int[][] ausfuehrungszeiten;
 	int makespan = 0;
 
 	int alter = 0;
 
 	public int berechneTFT() {
 		Problem problem = new Problem();
-		int[][] ausfuehrungszeiten = problem.getAusfuehrungszeiten();
 		int tft = 0;
 		
-		int[][] leavingTime = new int[Problem.anzahlMaschinen][jobreihenfolge.length];
+		int[][] leavingTime = new int[anzahlMaschinen][jobreihenfolge.length];
 		leavingTime[0][0] = ausfuehrungszeiten[0][jobreihenfolge[0]];
 
 // leavingTimes für Job 1

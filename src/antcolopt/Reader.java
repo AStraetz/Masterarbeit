@@ -12,7 +12,30 @@ import java.io.IOException;
 
 public class Reader {
 
-	private int[] jobZeiten = new int[Problem.anzahlJobs];
+	private int[] jobZeiten;
+	private int anzahlJobs;
+	private int anzahlMaschinen;
+	private int[][][] ausfuehrungszeiten;
+	private int[][][] dueDates;
+	
+	
+
+	public int[][][] getAusfuehrungszeiten() {
+		return ausfuehrungszeiten;
+	}
+
+	public void setAusfuehrungszeiten(int[][][] ausfuehrungszeiten) {
+		this.ausfuehrungszeiten = ausfuehrungszeiten;
+	}
+
+	public Reader(int anzahlJobs, int anzahlMaschinen) {
+		super();
+		
+		this.anzahlJobs = anzahlJobs;
+		this.anzahlMaschinen = anzahlMaschinen;
+		this.ausfuehrungszeiten = new int[10][anzahlMaschinen][anzahlJobs];
+		this.jobZeiten =  new int[anzahlJobs];
+	}
 
 	public void ladeBestwerteTFT(String datName) {
 		int problemklasse = 0;
@@ -59,7 +82,7 @@ public class Reader {
 		}
 	}
 
-	public void ladeProbleminstanzen(String datName) {
+	public int[][][] ladeProbleminstanzen(String datName) {
 		int counterInstanz = 0;
 		int counterZeile = 0;
 
@@ -70,12 +93,13 @@ public class Reader {
 
 		BufferedReader in = null;
 		try {
+			
 			in = new BufferedReader(new FileReader(datName));
 			String zeile = null;
 			while ((zeile = in.readLine()) != null) {
 
 				if (zeile.contains("processing times")) {
-					for (int i = 0; i < Problem.anzahlMaschinen; i++) {
+					for (int i = 0; i < anzahlMaschinen; i++) {
 
 						zeile = in.readLine();
 						// System.out.println("Gelesene Zeile: " + zeile);
@@ -84,9 +108,9 @@ public class Reader {
 						// for (int j = 0; j < Problem.anzahlJobs; j++) {
 						// System.out.println(splitted[j]);
 						// }
-						addAsInt(splitted);
+						addAsInt(splitted, anzahlJobs);
 						for (int b = 0; b < jobZeiten.length; b++) {
-							Problem.ausfuehrungszeiten0[counterInstanz][counterZeile][b] = jobZeiten[b];
+							ausfuehrungszeiten[counterInstanz][counterZeile][b] = jobZeiten[b];
 						}
 
 						counterZeile++;
@@ -98,6 +122,7 @@ public class Reader {
 				}
 
 			}
+			return ausfuehrungszeiten;
 			// System.out.println(toString());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -108,10 +133,11 @@ public class Reader {
 				} catch (IOException e) {
 				}
 		}
+		return ausfuehrungszeiten;
 	}
 
-	private void addAsInt(String[] elements) {
-		for (int i = 1; i < Problem.anzahlJobs + 1; i++) {
+	private void addAsInt(String[] elements, int anzahlJobs) {
+		for (int i = 1; i < anzahlJobs + 1; i++) {
 
 			jobZeiten[i - 1] = (new Integer(Integer.parseInt(elements[i])));
 		}
@@ -121,10 +147,10 @@ public class Reader {
 	public String toString() {
 		String s = "";
 		for (int i = 0; i < 10; i++) {
-			for (int j = 0; j < Problem.anzahlMaschinen; j++) {
-				for (int k = 0; k < Problem.anzahlJobs; k++) {
+			for (int j = 0; j < anzahlMaschinen; j++) {
+				for (int k = 0; k < anzahlJobs; k++) {
 
-					s += Problem.ausfuehrungszeiten0[i][j][k] + " ";
+					s += ausfuehrungszeiten[i][j][k] + " ";
 				}
 				s += "\n";
 			}

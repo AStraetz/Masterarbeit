@@ -1,28 +1,27 @@
 package antcolopt;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-
-import javax.swing.text.ElementIterator;
 
 public class Ameise {
 
-	
-	List<Integer> erlaubteKnoten = new ArrayList<Integer>();
-	int aktuellePosition;
+	private List<Integer> erlaubteKnoten = new ArrayList<Integer>();
+	private int aktuellePosition;
 	private List<Integer> nachbarschaft = new ArrayList<Integer>();
-	private int nachbarschaftsgroesse = Problem.nachbarschaftsGroesse;
+	private int nachbarschaftsgroesse = KonstantenUndHelper.NACHBARSCHAFT_GROESSE;
 	private Loesung eliteLoesung;
 	private int anzahlJobs;
-	private int anzahlMaschinen;
-	int[] besuchteKnoten;
+	private int[] besuchteKnoten;
+	private double[] wahrscheinlichkeiten;
 
-	double[] wahrscheinlichkeiten;
-
+	/** Nachbarschaft wird initialisiert
+	 * 
+	 * @param eliteloesung    beste bisher gefundene Loesung
+	 * @param jobAnzahl       Anzahl der zu optimierenden Jobs
+	 * @param maschinenAnzahl Anzahl der zu opotimierenden Maschinen
+	 */
 	public Ameise(Loesung eliteloesung, int jobAnzahl, int maschinenAnzahl) {
 		anzahlJobs = jobAnzahl;
-		anzahlMaschinen = maschinenAnzahl;
 		for (int i = 0; i < nachbarschaftsgroesse; i++) {
 			nachbarschaft.add(eliteloesung.getJobreihenfolge()[i]);
 		}
@@ -33,54 +32,70 @@ public class Ameise {
 		aktuellePosition = 0;
 		besuchteKnoten = new int[anzahlJobs];
 		wahrscheinlichkeiten = new double[anzahlJobs];
-
 	}
 
-	public void updateWahrscheinlichkeiten(double[][] matrix) {
+	/**
+	 * Aktualisiert die Wahrscheinlichekitsmatrix nachdem ein Job gewählt wurde
+	 * 
+	 * @param wahrscheinlichkeitsMatrix Matrix mit den Wahrscheinlichekiten Job i
+	 *                                  aud Platz j zu setzen
+	 */
+	private void updateWahrscheinlichkeiten(double[][] wahrscheinlichkeitsMatrix) {
 
-		if (Problem.nachbarschaftsregel == true) {
+		if (KonstantenUndHelper.VERWENDE_NACHBARSCHAFTSREGEL) {
 
-			double summeAlleKanten = 0;
-			for (Integer knotenInNachbarschaft : nachbarschaft) {
-				summeAlleKanten += matrix[aktuellePosition][knotenInNachbarschaft]
-						* Math.pow((1.0 / Problem.gesamtBearbeitungsZeitJobs[knotenInNachbarschaft]), Problem.beta);
-			}
-			for (Integer knotenInNachbarschaft : nachbarschaft) {
-
-				wahrscheinlichkeiten[knotenInNachbarschaft] = Math
-						.pow((matrix[aktuellePosition][knotenInNachbarschaft]), Problem.alpha)
-						* Math.pow((1.0 / Problem.gesamtBearbeitungsZeitJobs[knotenInNachbarschaft]), Problem.beta)
-						/ summeAlleKanten;
-
-			}
-
+			berechneWahrscheinlichkeitenInNachbarschaft(wahrscheinlichkeitsMatrix);
 		}
 
 		else {
-
-			double summeAlleKanten = 0;
-			for (int i = 0; i < anzahlJobs; i++) {
-				if (erlaubteKnoten.contains(i)) {
-					summeAlleKanten += matrix[aktuellePosition][i]
-							* Math.pow((1.0 / Problem.gesamtBearbeitungsZeitJobs[i]), Problem.beta);
-				}
-			}
-
-			// System.out.println("Summe alle Kanten: " + summeAlleKanten);
-
-			for (int i = 0; i < anzahlJobs; i++) {
-				if (erlaubteKnoten.contains(i)) {
-					wahrscheinlichkeiten[i] = Math.pow((matrix[aktuellePosition][i]), Problem.alpha)
-							* Math.pow((1.0 / Problem.gesamtBearbeitungsZeitJobs[i]), Problem.beta) / summeAlleKanten;
-				} else {
-					wahrscheinlichkeiten[i] = 0;
-				}
-			}
+			berechneAlleWahrscheinlichkeiten(wahrscheinlichkeitsMatrix);
 
 		}
 	}
 
-	public void bestimmeNachbarschaft() {
+	/**
+	 * Berechnet die Wahrscheinlichkeiten traditionell
+	 * 
+	 * @param matrix Matrix mit den Wahrscheinlichekiten Job i aud Platz j zu setzen
+	 */
+	private void berechneAlleWahrscheinlichkeiten(double[][] matrix) {
+		double summeAlleKanten = 0;
+		for (int i = 0; i < anzahlJobs; i++) {
+			if (erlaubteKnoten.contains(i)) {
+				summeAlleKanten += matrix[aktuellePosition][i];
+			}
+		}
+		for (int i = 0; i < anzahlJobs; i++) {
+			if (erlaubteKnoten.contains(i)) {
+				wahrscheinlichkeiten[i] = Math.pow((matrix[aktuellePosition][i]), KonstantenUndHelper.ALPHA)
+						/ summeAlleKanten;
+			} else {
+				wahrscheinlichkeiten[i] = 0;
+			}
+		}
+	}
+
+	/**
+	 * Berechnet die Wahrscheinlichkeiten mit der Nachbarschaftsregel
+	 * 
+	 * @param matrix Matrix mit den Wahrscheinlichekiten Job i aud Platz j zu setzen
+	 */
+	private void berechneWahrscheinlichkeitenInNachbarschaft(double[][] matrix) {
+		double summeAlleKanten = 0;
+		for (Integer knotenInNachbarschaft : nachbarschaft) {
+			summeAlleKanten += matrix[aktuellePosition][knotenInNachbarschaft];
+		}
+		for (Integer knotenInNachbarschaft : nachbarschaft) {
+			wahrscheinlichkeiten[knotenInNachbarschaft] = Math.pow((matrix[aktuellePosition][knotenInNachbarschaft]),
+					KonstantenUndHelper.ALPHA) / summeAlleKanten;
+		}
+	}
+
+	/**
+	 * Bestimmt die Nachbarschaft: die ersten [nachbarschaftsgroesse] ungesetzen
+	 * Jobs der Eliteloesung
+	 */
+	/*private void bestimmeNachbarschaft() {
 		nachbarschaft = new ArrayList<Integer>();
 		for (int job : eliteLoesung.getJobreihenfolge()) {
 			if (erlaubteKnoten.contains(job)) {
@@ -91,23 +106,66 @@ public class Ameise {
 			}
 		}
 	}
+*/
+	/**
+	 * Bestimmt den naechsten Job in der Bearbeitungsreihenfolge
+	 * 
+	 * @param matrix Matrix mit den Wahrscheinlichekiten Job i aud Platz j zu setzen
+	 */
+	public void bestimmteNaechstenJob(double[][] matrix) {
+		double random = Math.random();
+		if (KonstantenUndHelper.BENUTZE_q0_REGEL && (random < KonstantenUndHelper.q0)) {
 
-	public void naechsterKnoten(double[][] matrix) {
+			berechneNaechstenKnotenNachq0Regel(matrix);
 
-		if (Problem.benutzeq0 == true) {
+		} else {
 
-			double random = Math.random();
-			if (random < Problem.q0) {
-				double maximalerPheromonwert = 0;
-				int knotenMitMaximalemPheromonwert = -99;
-				for (int knoten : nachbarschaft) {
-					if (matrix[aktuellePosition][knoten] > maximalerPheromonwert) {
-						maximalerPheromonwert = matrix[aktuellePosition][knoten];
-						knotenMitMaximalemPheromonwert = knoten;
-					}
-				}
+			if (KonstantenUndHelper.VERWENDE_NACHBARSCHAFTSREGEL) {
+				berechneNaechstenKnotenNachNachbarschaftsRegel(matrix);
+			} else {
+				berechneNaechstenKnotenKonventionell(matrix);
+			}
 
-				int ergebnis = knotenMitMaximalemPheromonwert;
+		}
+	}
+
+	/**
+	 * Berechnung des naechsten Jobs ohne Nachbarschaftsregel, bzw q0-Regel
+	 * 
+	 * @param matrix Matrix mit den Wahrscheinlichekiten Job i aud Platz j zu setzen
+	 */
+	private void berechneNaechstenKnotenKonventionell(double[][] matrix) {
+		updateWahrscheinlichkeiten(matrix);
+		// for (Object knoten : erlaubteKnoten) {
+		double summe = 0;
+		double zufallszahl = Math.random();
+		for (int i = 0; i < erlaubteKnoten.size(); i++) {
+			summe += wahrscheinlichkeiten[erlaubteKnoten.get(i)];
+			if (zufallszahl < summe) {
+				int ergebnis = erlaubteKnoten.get(i);
+				erlaubteKnoten.remove(i);
+				besuchteKnoten[aktuellePosition] = ergebnis;
+				aktuellePosition++;
+				return;
+			}
+			// }
+		}
+	}
+
+	/**
+	 * Berechnung des naechsten Jobs mit Nachbarschaftsregel
+	 * 
+	 * @param matrix Matrix mit den Wahrscheinlichekiten Job i aud Platz j zu setzen
+	 */
+	private void berechneNaechstenKnotenNachNachbarschaftsRegel(double[][] matrix) {
+		updateWahrscheinlichkeiten(matrix);
+		double summe = 0;
+		double zufallszahl = Math.random();
+		int ergebnis = 0;
+		for (Integer knotenInNachbarschaft : nachbarschaft) {
+			summe += wahrscheinlichkeiten[knotenInNachbarschaft];
+			if (zufallszahl < summe) {
+				ergebnis = knotenInNachbarschaft;
 				erlaubteKnoten.remove((Integer) ergebnis);
 				besuchteKnoten[aktuellePosition] = ergebnis;
 				nachbarschaft.remove((Integer) ergebnis);
@@ -116,58 +174,33 @@ public class Ameise {
 				}
 				aktuellePosition++;
 				return;
+			}
+		}
+	}
 
+	/**
+	 * Berechnung des naechsten Jobs mit q0-Regell
+	 * 
+	 * @param matrix Matrix mit den Wahrscheinlichekiten Job i aud Platz j zu setzen
+	 */
+	private void berechneNaechstenKnotenNachq0Regel(double[][] matrix) {
+		double maximalerPheromonwert = 0;
+		int knotenMitMaximalemPheromonwert = -99;
+		for (int knoten : nachbarschaft) {
+			if (matrix[aktuellePosition][knoten] > maximalerPheromonwert) {
+				maximalerPheromonwert = matrix[aktuellePosition][knoten];
+				knotenMitMaximalemPheromonwert = knoten;
 			}
 		}
 
-		if (Problem.nachbarschaftsregel == true) {
-			// System.out.println(knoten);
-			updateWahrscheinlichkeiten(matrix);
-			double summe = 0;
-			double zufallszahl = Math.random();
-			// System.out.println("zufallszahl: " + zufallszahl);
-			for (Integer knotenInNachbarschaft : nachbarschaft) {
-				// System.out.println("wahrscheinlichkeit: " +
-				// wahrscheinlichkeiten[erlaubteKnoten.get(i)]);
-				summe += wahrscheinlichkeiten[knotenInNachbarschaft];
-				if (zufallszahl < summe) {
-					int ergebnis = knotenInNachbarschaft;
-					erlaubteKnoten.remove((Integer) knotenInNachbarschaft);
-					besuchteKnoten[aktuellePosition] = ergebnis;
-					nachbarschaft.remove((Integer) knotenInNachbarschaft);
-					if (aktuellePosition < (anzahlJobs - nachbarschaftsgroesse)) {
-						nachbarschaft.add(eliteLoesung.getJobreihenfolge()[aktuellePosition + nachbarschaftsgroesse]);
-					}
-					aktuellePosition++;
-					return;
-				}
-			}
-		} else {
-
-			// Collections.sort(erlaubteKnoten);
-			updateWahrscheinlichkeiten(matrix);
-			// System.out.println(toString());
-			for (Object knoten : erlaubteKnoten) {
-				// System.out.println(knoten);
-				double summe = 0;
-				double zufallszahl = Math.random();
-				// System.out.println("zufallszahl: " + zufallszahl);
-				for (int i = 0; i < erlaubteKnoten.size(); i++) {
-					// System.out.println("wahrscheinlichkeit: " +
-					// wahrscheinlichkeiten[erlaubteKnoten.get(i)]);
-					summe += wahrscheinlichkeiten[erlaubteKnoten.get(i)];
-					if (zufallszahl < summe) {
-						int ergebnis = erlaubteKnoten.get(i);
-						erlaubteKnoten.remove(i);
-						besuchteKnoten[aktuellePosition] = ergebnis;
-
-						aktuellePosition++;
-						return;
-					}
-				}
-			}
+		int ergebnis = knotenMitMaximalemPheromonwert;
+		erlaubteKnoten.remove((Integer) ergebnis);
+		besuchteKnoten[aktuellePosition] = ergebnis;
+		nachbarschaft.remove((Integer) ergebnis);
+		if (aktuellePosition < (anzahlJobs - nachbarschaftsgroesse)) {
+			nachbarschaft.add(eliteLoesung.getJobreihenfolge()[aktuellePosition + nachbarschaftsgroesse]);
 		}
-
+		aktuellePosition++;
 	}
 
 	public int[] getBesuchteKnoten() {

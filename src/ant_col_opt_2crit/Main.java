@@ -29,7 +29,7 @@ public class Main {
 				Reader reader = new Reader();
 				reader.ladeProbleminstanzen(dateiName);
 				reader.ladeBestwerteTFT(Problem.dateiBewerteTft);
-				Problem.berechneGesamtBearbeitungsZeitJobs();
+				//Problem.berechneGesamtBearbeitungsZeitJobs();
 				
 				for (int z = 0; z < 1; z++) {
 					Problem.probleminstanz = z;

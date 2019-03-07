@@ -115,8 +115,10 @@ public class Ameise {
 	public void bestimmteNaechstenJob(double[][] matrix) {
 		double random = Math.random();
 		if (KonstantenUndHelper.BENUTZE_q0_REGEL && (random < KonstantenUndHelper.q0)) {
-
-			berechneNaechstenKnotenNachq0Regel(matrix);
+			if (KonstantenUndHelper.VERWENDE_NACHBARSCHAFTSREGEL) {
+			berechneNaechstenKnotenNachq0UndNachbarRegel(matrix);} else {
+				 berechneNaechstenKnotenNachq0(matrix);
+			}
 
 		} else {
 
@@ -127,6 +129,24 @@ public class Ameise {
 			}
 
 		}
+	}
+	
+	private void berechneNaechstenKnotenNachq0(double[][] matrix) {
+		updateWahrscheinlichkeiten(matrix);
+		double maximalerPheromonwert = 0;
+		int knotenMitMaximalemPheromonwert = -99;
+		for (int i = 0; i < erlaubteKnoten.size(); i++) {
+			if (matrix[aktuellePosition][erlaubteKnoten.get(i)] > maximalerPheromonwert) {
+				maximalerPheromonwert = matrix[aktuellePosition][erlaubteKnoten.get(i)];
+				knotenMitMaximalemPheromonwert = erlaubteKnoten.get(i);
+			}
+		}
+
+		int ergebnis = knotenMitMaximalemPheromonwert;
+		erlaubteKnoten.remove((Integer) ergebnis);
+		besuchteKnoten[aktuellePosition] = ergebnis;
+		
+		aktuellePosition++;
 	}
 
 	/**
@@ -183,7 +203,7 @@ public class Ameise {
 	 * 
 	 * @param matrix Matrix mit den Wahrscheinlichekiten Job i aud Platz j zu setzen
 	 */
-	private void berechneNaechstenKnotenNachq0Regel(double[][] matrix) {
+	private void berechneNaechstenKnotenNachq0UndNachbarRegel(double[][] matrix) {
 		double maximalerPheromonwert = 0;
 		int knotenMitMaximalemPheromonwert = -99;
 		for (int knoten : nachbarschaft) {

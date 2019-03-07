@@ -7,6 +7,12 @@ import java.util.List;
 public class KonstantenUndHelper {
 
 
+	public static final boolean VERWENDE_HEURISTIK = false;
+	public static double PHEROMON_MAX = 10.0;
+	public static double ELITE_ANTEIL = 0.25;
+	public static double elite_pheromonzuwachs;
+	public static double pheromon_inital = 1.0/20.0;
+	public static double PHEROMON_UPDATE_MENGE = 0;
 	public static final int ANZAHL_AMEISEN = 5;
 	public static final boolean VERWENDE_LOKALESUCHE = true;
 	public static double[] gesamtBearbeitungsZeitJobs;
@@ -17,11 +23,11 @@ public class KonstantenUndHelper {
 			"D:\\tailard\\tai20_20.txt", "D:\\tailard\\tai50_5.txt", "D:\\tailard\\tai50_10.txt",
 			"D:\\tailard\\tai50_20.txt", "D:\\tailard\\tai100_5.txt", "D:\\tailard\\tai100_10.txt",
 			"D:\\tailard\\tai100_20.txt" };
-	public static final double q0 = 0.90;
-	public static final int POPULATIONSGROESSE = 3;
+	public static final double q0 = 0.9;
+	public static final int POPULATIONSGROESSE = 1;
 	public static final boolean VERWENDE_SUMMENREGEL = false;
-	public static final boolean BENUTZE_q0_REGEL = true;
-	public static final int[] BERECHNUNGSZEITEN_PROBLEMKLASSEN = { 3000, 6000, 12000, 37500, 75000, 150000, 150000,
+	public static final boolean BENUTZE_q0_REGEL = false;
+	public static final int[] BERECHNUNGSZEITEN_PROBLEMKLASSEN = { 6000, 12000, 24000, 37500, 75000, 150000, 150000,
 			300000, 600000 };
 	public static final int[] ANZAHL_JOBS_PROBLEMKLASSEN = { 20, 20, 20, 50, 50, 50, 100, 100, 100 };
 	public static final int[] ANZAHL_MASCHINEN_PROBLEMKLASSEN = { 5, 10, 20, 5, 10, 20, 5, 10, 20 };

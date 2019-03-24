@@ -17,11 +17,11 @@ public class Main {
 	private static final String PFAD_LOGS = "./logs/logs.txt";
 	private static final int MITTELUNG_ANZAHL = 10;
 	// Problemklassen von 0-8
-	private static final int PROBLEMKLASSEN_STARTWERT = 3;
-	private static final int PROBLEMKLASSEN_ENDWERT = 6;
+	private static final int PROBLEMKLASSEN_STARTWERT = 0;
+	private static final int PROBLEMKLASSEN_ENDWERT = 8;
 	// Probleminstanzen von 0-9
-	private static final int PROBLEMINSTANZEN_STARTWERT =2;
-	private static final int PROBLEMINSTANZEN_ENDWERT = 2;
+	private static final int PROBLEMINSTANZEN_STARTWERT =9;
+	private static final int PROBLEMINSTANZEN_ENDWERT =9;
 	// Wartekapazitaeten von 1-4
 	private static final int WARTEKAPAZITAETEN_STARTWERT = 2;
 	private static final int WARTEKAPAZITAETEN_ENDWERT = 2;
@@ -55,25 +55,25 @@ public class Main {
 					for (int wartekapazitaet = WARTEKAPAZITAETEN_STARTWERT; wartekapazitaet < WARTEKAPAZITAETEN_ENDWERT
 							+ 1; wartekapazitaet++) {
 						KonstantenUndHelper.wartekapazitaet = wartekapazitaet;
-						for (int h = 1; h < 2; h++) {
-							for(int p = 4; p < 7; p++) {
-
+						for (int h = 1; h < 3; h++) {
+							for(int p = 0; p < 3; p++) {
+if(h==1) {KonstantenUndHelper.POPULATIONSGROESSE = 3;}
+if(h==2) {KonstantenUndHelper.POPULATIONSGROESSE = 1;}
+if(p==0) {KonstantenUndHelper.PHEROMON_MAX = 5.0; }
+if(p==1) {KonstantenUndHelper.PHEROMON_MAX = KonstantenUndHelper.ANZAHL_JOBS_PROBLEMKLASSEN[problemklasse] * 0.07;}
+if(p==2) {KonstantenUndHelper.PHEROMON_MAX = KonstantenUndHelper.ANZAHL_JOBS_PROBLEMKLASSEN[problemklasse] * 0.1;}
 							KonstantenUndHelper.anzahlLokaleSuche = 5
 									* KonstantenUndHelper.ANZAHL_JOBS_PROBLEMKLASSEN[problemklasse];
 
-						//	KonstantenUndHelper.wartekapazitaet = ((problemklasse + 1) % 4) + 1;
-							Loesung heuristikLoesung = KonstantenUndHelper.generiereTftHeristikLoesung(
-									KonstantenUndHelper.ANZAHL_JOBS_PROBLEMKLASSEN[problemklasse],
-									KonstantenUndHelper.ANZAHL_MASCHINEN_PROBLEMKLASSEN[problemklasse],
-									reader.getAusfuehrungszeiten()[probleminstanz]);
+							KonstantenUndHelper.wartekapazitaet = ((problemklasse + 4) % 4) + 1;
+							
 
 							// KonstantenUndHelper.wartekapazitaet = wartekapazitaet;
 						
 							KonstantenUndHelper.pheromon_inital = 1.0
 									/ (double) KonstantenUndHelper.ANZAHL_JOBS_PROBLEMKLASSEN[problemklasse];
-							KonstantenUndHelper.PHEROMON_MAX = 0.3 + p * 0.4;
-							KonstantenUndHelper.ELITE_ANTEIL = 0.25 + h * 0.25;
-
+							KonstantenUndHelper.ELITE_ANTEIL = 0.9;
+							
 							// logWriter.write("\n");
 							
 								
@@ -91,7 +91,7 @@ public class Main {
 								// + " Maschinen; " + mittelungsInstanz + " MittelungsInstanz");
 								// logWriter.write("\n");
 								berechneLoesung(logWriter, besteTfts, problemklasse, reader, probleminstanz,
-										heuristikLoesung, mittelungsInstanz);
+										 mittelungsInstanz);
 
 							}
 							// logWriter.write("\n");
@@ -112,16 +112,22 @@ public class Main {
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
+		
 	}
 
 	private static void berechneLoesung(BufferedWriter logWriter, int[] besteBekannteTFTs, int problemklasse,
-			Reader reader, int probleminstanz, Loesung heuristikLoesung, int mittelungsInstanz) throws IOException {
+			Reader reader, int probleminstanz, int mittelungsInstanz) throws IOException {
+		
+		boolean weiterRechnen = true;
+		final long timeStart = System.currentTimeMillis();
+		Loesung heuristikLoesung = KonstantenUndHelper.generiereTftHeristikLoesung(
+				KonstantenUndHelper.ANZAHL_JOBS_PROBLEMKLASSEN[problemklasse],
+				KonstantenUndHelper.ANZAHL_MASCHINEN_PROBLEMKLASSEN[problemklasse],
+				reader.getAusfuehrungszeiten()[probleminstanz]);
 		Population population = new Population(KonstantenUndHelper.ANZAHL_JOBS_PROBLEMKLASSEN[problemklasse],
 				KonstantenUndHelper.ANZAHL_MASCHINEN_PROBLEMKLASSEN[problemklasse],
 				reader.getAusfuehrungszeiten()[probleminstanz], heuristikLoesung);
 		eliteLoesung = population.getEliteloesung();
-		boolean weiterRechnen = true;
-		final long timeStart = System.currentTimeMillis();
 		while (weiterRechnen) {
 			weiterRechnen = berechneIterationUndMesseZeit(logWriter, problemklasse, population, timeStart);
 		}
@@ -182,7 +188,7 @@ public class Main {
 			FileWriter fw2 = new FileWriter("./logs/" + KonstantenUndHelper.ANZAHL_JOBS_PROBLEMKLASSEN[problemklasse]
 					+ "_" + KonstantenUndHelper.ANZAHL_MASCHINEN_PROBLEMKLASSEN[problemklasse] + "_" + probleminstanz
 					+ "_" + KonstantenUndHelper.wartekapazitaet + "_" + KonstantenUndHelper.ELITE_ANTEIL + "_" + KonstantenUndHelper.PHEROMON_MAX + "_"
-					+ KonstantenUndHelper.anzahlLokaleSuche + "_" + "logs.txt");
+					+ KonstantenUndHelper.anzahlLokaleSuche + "_" + KonstantenUndHelper.POPULATIONSGROESSE + "_"  + "logs.txt");
 			BufferedWriter logWriter2 = new BufferedWriter(fw2);
 			for (int i = 0; i < gemittelteErgebnisseList.size(); i++) {
 				logWriter2.write("" + (gemittelteErgebnisseList.get(i) / 10));

@@ -7,7 +7,7 @@ import java.util.List;
 public class KonstantenUndHelper {
 
 
-	public static final boolean VERWENDE_HEURISTIK = false;
+	public static final boolean VERWENDE_HEURISTIK = true;
 	public static double PHEROMON_MAX = 10.0;
 	public static double ELITE_ANTEIL = 0.25;
 	public static double elite_pheromonzuwachs;
@@ -24,7 +24,7 @@ public class KonstantenUndHelper {
 			"D:\\tailard\\tai50_20.txt", "D:\\tailard\\tai100_5.txt", "D:\\tailard\\tai100_10.txt",
 			"D:\\tailard\\tai100_20.txt" };
 	public static final double q0 = 0.9;
-	public static final int POPULATIONSGROESSE = 1;
+	public static int POPULATIONSGROESSE = 3;
 	public static final boolean VERWENDE_SUMMENREGEL = false;
 	public static final boolean BENUTZE_q0_REGEL = false;
 	public static final int[] BERECHNUNGSZEITEN_PROBLEMKLASSEN = { 6000, 12000, 24000, 37500, 75000, 150000, 150000,
@@ -36,11 +36,12 @@ public class KonstantenUndHelper {
 	public static final int SPALTENANZAHL_AUS_BESTWERTE_TFT = 4;
 	// Konstanten, die sich nur ändern, wenn mehrere Problemklassen gleichzeitig
 	// getestet werden
-	static double updategewicht = 0.5;
+	static double updategewicht = 0.6;
 	static int wartekapazitaet = 1;
 	static double eliteUpdateGewicht = 1;
 	static int anzahlLokaleSuche = 0;
 	static double[][] bestWerteTft = new double[90][4];
+
 
 	/**
 	 * Berechnet die Jobreihenfolge mit Hilfe der Rajendran Heuristik

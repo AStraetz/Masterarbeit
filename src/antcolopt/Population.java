@@ -16,14 +16,16 @@ public class Population {
 	List<Integer> list = new ArrayList<Integer>();
 	List<Integer> list2 = new ArrayList<Integer>();
 	int tftEliteLoesung;
-	int besterTftInPopulation;
+	int besterTftInIteration;
 	private int anzahlJobs = 0;
 	private int anzahlMaschinen = 0;
 	private int[][] ausfuehrungszeiten;
-	private int[][][] dueDates;
+	//private int[][][] dueDates;
 	double[][] pheromonmatrix;
 	Loesung heuristikLoesung;
 	boolean bessereLoesungGefunden = false;
+	//private int anzahlThreads = 4;
+	// List threads = new ArrayList();
 
 	/**
 	 * Generiert erste Eliteloesung nach Heuristik
@@ -32,13 +34,13 @@ public class Population {
 	 * @param anzahlMaschinen    Anzahl der zu optimierenden Maschinen
 	 * @param ausfuehrungszeiten Bearbeitungszeiten der Jobs pro Maschine
 	 */
-	public Population(int jobAnzahl, int maschinenAnzahl, int[][] ausfuehrungszeiten,Loesung heuristikLoesung) {
+	public Population(int jobAnzahl, int maschinenAnzahl, int[][] ausfuehrungszeiten, Loesung heuristikLoesung) {
 		anzahlJobs = jobAnzahl;
 		anzahlMaschinen = maschinenAnzahl;
 		this.heuristikLoesung = heuristikLoesung;
 		this.ausfuehrungszeiten = ausfuehrungszeiten;
 		pheromonmatrix = new double[anzahlJobs][anzahlJobs];
-		dueDates = new int[9][4][anzahlJobs];
+		//dueDates = new int[9][4][anzahlJobs];
 		for (int i = 0; i < anzahlJobs; i++) {
 			for (int j = 0; j < anzahlJobs; j++) {
 				pheromonmatrix[i][j] = (double) 1 / (anzahlJobs);
@@ -50,28 +52,29 @@ public class Population {
 		}
 		java.util.Collections.shuffle(list);
 		java.util.Collections.shuffle(list2);
-		if(KonstantenUndHelper.VERWENDE_HEURISTIK) {
-	    eliteloesung = heuristikLoesung;
-	   eliteloesung = lokaleSucheBestChangeFound(eliteloesung, KonstantenUndHelper.anzahlLokaleSuche);
-		}
-		else {
-			//zufaellige Eliteloesung
+		if (KonstantenUndHelper.VERWENDE_HEURISTIK) {
+			eliteloesung = heuristikLoesung;
+			eliteloesung = lokaleSucheBestChangeFound(eliteloesung, KonstantenUndHelper.anzahlLokaleSuche);
+		} else {
+			// zufaellige Eliteloesung
 			int[] zufaelligeJobReihenfolge = new int[list.size()];
-			  for(int i = 0;i < zufaelligeJobReihenfolge.length;i++) {
-			    zufaelligeJobReihenfolge[i] = list.get(i);}
-			  Loesung zufaelligeLoesung = new Loesung(0, anzahlJobs, anzahlMaschinen, ausfuehrungszeiten);
-			  zufaelligeLoesung.setJobreihenfolge(zufaelligeJobReihenfolge);
+			for (int i = 0; i < zufaelligeJobReihenfolge.length; i++) {
+				zufaelligeJobReihenfolge[i] = list.get(i);
+			}
+			Loesung zufaelligeLoesung = new Loesung(0, anzahlJobs, anzahlMaschinen, ausfuehrungszeiten);
+			zufaelligeLoesung.setJobreihenfolge(zufaelligeJobReihenfolge);
 			eliteloesung = zufaelligeLoesung;
 		}
+		eliteloesung = lokaleSucheBestChangeFound(eliteloesung, KonstantenUndHelper.anzahlLokaleSuche);
 		tftEliteLoesung = eliteloesung.berechneTFT();
-		
+
 		for (int i = 0; i < pheromonmatrix.length; i++) {
 			pheromonmatrix[i][eliteloesung.jobreihenfolge[i]] = pheromonmatrix[i][eliteloesung.jobreihenfolge[i]]
 					+ KonstantenUndHelper.elite_pheromonzuwachs;
-					//+ (KonstantenUndHelper.eliteUpdateGewicht / anzahlJobs);
+			// + (KonstantenUndHelper.eliteUpdateGewicht / anzahlJobs);
 		}
-		
-	//	System.out.println(toString());
+
+		// System.out.println(toString());
 	}
 
 	/**
@@ -83,12 +86,12 @@ public class Population {
 	private void updateMatrix(Loesung neueLoesung, Loesung alteLoesung) {
 		for (int i = 0; i < pheromonmatrix.length; i++) {
 			pheromonmatrix[i][neueLoesung.jobreihenfolge[i]] = pheromonmatrix[i][neueLoesung.jobreihenfolge[i]]
-					+KonstantenUndHelper.PHEROMON_UPDATE_MENGE;
-					//+ (KonstantenUndHelper.updategewicht / anzahlJobs);
+					+ KonstantenUndHelper.PHEROMON_UPDATE_MENGE;
+			// + (KonstantenUndHelper.updategewicht / anzahlJobs);
 			if (anzahlLoesungen >= KonstantenUndHelper.POPULATIONSGROESSE) {
 				pheromonmatrix[i][alteLoesung.jobreihenfolge[i]] = pheromonmatrix[i][alteLoesung.jobreihenfolge[i]]
-						-KonstantenUndHelper.PHEROMON_UPDATE_MENGE;
-						//- (KonstantenUndHelper.updategewicht / anzahlJobs);
+						- KonstantenUndHelper.PHEROMON_UPDATE_MENGE;
+				// - (KonstantenUndHelper.updategewicht / anzahlJobs);
 				loesungenInPopulation[ermittleIndexAeltesteLoesung()] = neueLoesung;
 			}
 		}
@@ -106,15 +109,16 @@ public class Population {
 	private void updateEliteMatrix(Loesung neueLoesung, Loesung alteLoesung) {
 		for (int i = 0; i < pheromonmatrix.length; i++) {
 			pheromonmatrix[i][neueLoesung.jobreihenfolge[i]] = pheromonmatrix[i][neueLoesung.jobreihenfolge[i]]
-					+KonstantenUndHelper.elite_pheromonzuwachs;
-					//+ (KonstantenUndHelper.eliteUpdateGewicht / anzahlJobs);
+					+ KonstantenUndHelper.elite_pheromonzuwachs;
+			// + (KonstantenUndHelper.eliteUpdateGewicht / anzahlJobs);
 			pheromonmatrix[i][alteLoesung.jobreihenfolge[i]] = pheromonmatrix[i][alteLoesung.jobreihenfolge[i]]
-					-KonstantenUndHelper.elite_pheromonzuwachs;
-					//- (KonstantenUndHelper.eliteUpdateGewicht / anzahlJobs);
+					- KonstantenUndHelper.elite_pheromonzuwachs;
+			// - (KonstantenUndHelper.eliteUpdateGewicht / anzahlJobs);
 		}
 	}
 
-	/** Ermittelt die Loesung, die am laengsten in der Population ist
+	/**
+	 * Ermittelt die Loesung, die am laengsten in der Population ist
 	 * 
 	 * @return Gibt die aelteste Loesung in der Population zurueck
 	 */
@@ -130,7 +134,8 @@ public class Population {
 		return aeltesteLoesung;
 	}
 
-	/** Ermittelt den Index der Loesung, die am laengsten in der Population ist
+	/**
+	 * Ermittelt den Index der Loesung, die am laengsten in der Population ist
 	 * 
 	 * @return Gibt Index der aeltesten Loesung im Populationsarray zurueck
 	 */
@@ -165,7 +170,7 @@ public class Population {
 				besteLoesung = i;
 			}
 		}
-		besterTftInPopulation = tft;
+		besterTftInIteration = tft;
 		return besteLoesung;
 	}
 
@@ -194,18 +199,86 @@ public class Population {
 	 * Ameisen suche neue Loesungen, lokale Suche wird angewendet, Pheromonmatrix
 	 * wird aktualisiert
 	 */
+
 	public void berechneNeueIteration() {
 		Loesung[] loesungen = generiereNeueLoesungen();
-
-		if (KonstantenUndHelper.VERWENDE_LOKALESUCHE) {
-			for(int a = 0; a<loesungen.length;a++) {
-				loesungen[a] = lokaleSucheBestChangeFound(loesungen[a], KonstantenUndHelper.anzahlLokaleSuche);
-			}
+		for (int a = 0; a < loesungen.length; a++) {
+			loesungen[a] = lokaleSucheBestChangeFound(loesungen[a], KonstantenUndHelper.anzahlLokaleSuche);
 		}
 		aktualisierePopulationUndEliteloesung(loesungen);
-		//System.out.println(toString());
+		// System.out.println(toString());
 		iterationsanzahl++;
+	}
 
+	public void berechneNeueIterationParallel() {
+	//	Loesung[] loesungen = generiereNeueLoesungen();
+Loesung[] loesungen = new Loesung[KonstantenUndHelper.ANZAHL_AMEISEN];
+		if (KonstantenUndHelper.VERWENDE_LOKALESUCHE) {
+			List<LokaleSucheThread> threads = new ArrayList<>();
+			LokaleSucheThread thread;
+			for (int i = 0; i < KonstantenUndHelper.ANZAHL_AMEISEN; i++) {
+				thread = new LokaleSucheThread(anzahlJobs, anzahlMaschinen, ausfuehrungszeiten,eliteloesung,iterationsanzahl,pheromonmatrix);
+				threads.add(thread);
+				thread.start();
+			}
+			try {
+				for (int i = 0; i < KonstantenUndHelper.ANZAHL_AMEISEN; i++) {
+					thread = threads.get(i);
+					thread.join();
+					loesungen[i] = thread.getLoesung();
+				}
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+//			List<Thread> threads = new ArrayList<Thread>();
+
+			// loesungen[a] = lokaleSucheBestChangeFound(loesungen[a],
+			// KonstantenUndHelper.anzahlLokaleSuche);
+			// }
+
+			/*
+			 * new Thread() { public void run() { threads.add(this); loesungen[0] =
+			 * lokaleSucheBestChangeFound(loesungen[0],
+			 * KonstantenUndHelper.anzahlLokaleSuche);
+			 * 
+			 * } }.start();
+			 * 
+			 * new Thread() { public void run() { threads.add(this); loesungen[1] =
+			 * lokaleSucheBestChangeFound(loesungen[1],
+			 * KonstantenUndHelper.anzahlLokaleSuche); } }.start();
+			 * 
+			 * new Thread() { public void run() { threads.add(this); loesungen[2] =
+			 * lokaleSucheBestChangeFound(loesungen[2],
+			 * KonstantenUndHelper.anzahlLokaleSuche); } }.start();
+			 * 
+			 * new Thread() { public void run() { threads.add(this); loesungen[3] =
+			 * lokaleSucheBestChangeFound(loesungen[3],
+			 * KonstantenUndHelper.anzahlLokaleSuche); } }.start();
+			 * 
+			 * for (int i = 0; i < threads.size(); i++) try { ((Thread)
+			 * threads.get(i)).join(); } catch (InterruptedException e) {
+			 * e.printStackTrace(); }
+			 */
+
+//			LokaleSucheThread thread1 = new LokaleSucheThread(anzahlJobs, loesungen[0], anzahlMaschinen,
+//					ausfuehrungszeiten);
+//			LokaleSucheThread thread2 = new LokaleSucheThread(anzahlJobs, loesungen[1], anzahlMaschinen,
+//					ausfuehrungszeiten);
+//			LokaleSucheThread thread3 = new LokaleSucheThread(anzahlJobs, loesungen[2], anzahlMaschinen,
+//					ausfuehrungszeiten);
+//			LokaleSucheThread thread4 = new LokaleSucheThread(anzahlJobs, loesungen[3], anzahlMaschinen,
+//					ausfuehrungszeiten);
+
+//			thread1.start();
+//			thread2.start();
+//			thread3.start();
+//			thread4.start();
+		}
+		aktualisierePopulationUndEliteloesung(loesungen);
+		// System.out.println(toString());
+		iterationsanzahl++;
 	}
 
 	/**
@@ -227,7 +300,7 @@ public class Population {
 			}
 			loesungen[j].jobreihenfolge = ameisen[j].getBesuchteKnoten();
 		}
-	//System.out.println(toString());
+		//System.out.println(toString());
 		return loesungen;
 	}
 
@@ -237,17 +310,21 @@ public class Population {
 	 * @param loesungen Loesungen, die von en Ameisen neu generiert wurden
 	 */
 	private void aktualisierePopulationUndEliteloesung(Loesung[] loesungen) {
+	if(KonstantenUndHelper.POPULATIONSGROESSE > 1) {
 		int indexBesteLoesung = ermittleBesteLoesungAusIteration(loesungen);
-		besteLoesungIteration = loesungen[indexBesteLoesung];
+		besteLoesungIteration = loesungen[indexBesteLoesung];}
+	else {besteLoesungIteration = loesungen[0];
+	besterTftInIteration = loesungen[0].getLetztesTft();
+	}
 		if (anzahlLoesungen < KonstantenUndHelper.POPULATIONSGROESSE) {
-			loesungenInPopulation[iterationsanzahl] = loesungen[indexBesteLoesung];
+			loesungenInPopulation[iterationsanzahl] = besteLoesungIteration;
 		}
-		if (besterTftInPopulation < tftEliteLoesung) {
-			updateEliteMatrix(loesungen[indexBesteLoesung], eliteloesung);
-			eliteloesung = loesungen[indexBesteLoesung];
-			tftEliteLoesung = besterTftInPopulation;
+		if (besterTftInIteration < tftEliteLoesung) {
+			updateEliteMatrix(besteLoesungIteration, eliteloesung);
+			eliteloesung = besteLoesungIteration;
+			tftEliteLoesung = besterTftInIteration;
 		}
-		updateMatrix(loesungen[indexBesteLoesung], ermittleAeltesteLoesung());
+		updateMatrix(besteLoesungIteration, ermittleAeltesteLoesung());
 	}
 
 	/**
@@ -257,18 +334,26 @@ public class Population {
 	 * @param k         Suchschritte insgesamt sind 2*k (swap+insertion)
 	 */
 	private Loesung lokaleSucheBestChangeFound(Loesung loesung, int k) {
-	
+		List<Integer> list = new ArrayList<Integer>();
+		List<Integer> list2 = new ArrayList<Integer>();
+		for (int i = 0; i < anzahlJobs; i++) {
+			list.add(i);
+			list2.add(i);
+		}
+
 		for (int l = 0; l < k; l++) {
 			if (l % anzahlJobs == 0) {
-				if((bessereLoesungGefunden == false) && (l >1)) {return loesung;}
+				if ((bessereLoesungGefunden == false) && (l > 1)) {
+					return loesung;
+				}
 				java.util.Collections.shuffle(list);
 				java.util.Collections.shuffle(list2);
 				bessereLoesungGefunden = false;
 			}
-			
-				loesung = lokaleSucheInsertion(loesung, list.get(l % anzahlJobs));
-				loesung = swapSearch(loesung, list2.get(l % anzahlJobs));
-			
+
+			loesung = lokaleSucheInsertion(loesung, list.get(l % anzahlJobs));
+			loesung = swapSearch(loesung, list2.get(l % anzahlJobs));
+
 		}
 		return loesung;
 	}
@@ -284,8 +369,7 @@ public class Population {
 		int besterTft = loesung.berechneTFT();
 		int tftTemp = 0;
 		Loesung besteLoesung = loesung;
-
-		Loesung tempLoesung = new Loesung(loesung.getAlter(), anzahlJobs, anzahlMaschinen, ausfuehrungszeiten);
+        Loesung tempLoesung = new Loesung(loesung.getAlter(), anzahlJobs, anzahlMaschinen, ausfuehrungszeiten);
 
 		for (int i = 0; i < loesung.getJobreihenfolge().length; i++) {
 
@@ -308,7 +392,8 @@ public class Population {
 	 * //return 999; }
 	 */
 
-	/** Wendet lokale Suche mittels Swap Search an
+	/**
+	 * Wendet lokale Suche mittels Swap Search an
 	 * 
 	 * @param loesung Loesung, die verbessert werden soll
 	 * @param index   Index des Jobs, der vertauscht werden soll
@@ -338,7 +423,8 @@ public class Population {
 		return besteLoesung;
 	}
 
-	/** Nimmt einen Job der LOesung und setzt ihn an eine andere Stelle
+	/**
+	 * Nimmt einen Job der LOesung und setzt ihn an eine andere Stelle
 	 * 
 	 * @param loesung        Loesung, die veraendert werden soll
 	 * @param jobPosition    Index des Jobs, der wo anders eingesetzt werden soll
@@ -365,7 +451,8 @@ public class Population {
 		return loesung2;
 	}
 
-	/** Nimmt einen Job und vertauscht ihn mit einem anderen
+	/**
+	 * Nimmt einen Job und vertauscht ihn mit einem anderen
 	 * 
 	 * @param               Loesung, die veraendert werden soll
 	 * @param swapPosition1 Index des ersten Jobs, der getauscht werden soll
@@ -381,11 +468,10 @@ public class Population {
 		return loesung2;
 	}
 
-	
 	/**
-	 * Alternative Moeglichkeit fuer lokale Suche. Im Moment nicht verwendet.
-	 * Lokale Suche, abwechselnd Insertion und Swap. Erster Change, der besser ist,
-	 * wird ausgeführt. 
+	 * Alternative Moeglichkeit fuer lokale Suche. Im Moment nicht verwendet. Lokale
+	 * Suche, abwechselnd Insertion und Swap. Erster Change, der besser ist, wird
+	 * ausgeführt.
 	 * 
 	 * @param loesungen Loesungen, die durch lokale SUche verbessert werden sollen
 	 * @param k         Suchschritte insgesamt sind 2*k (swap+insertion)
@@ -430,14 +516,6 @@ public class Population {
 		this.ausfuehrungszeiten = ausfuehrungszeiten0;
 	}
 
-	public int[][][] getDueDates() {
-		return dueDates;
-	}
-
-	public void setDueDates(int[][][] dueDates) {
-		this.dueDates = dueDates;
-	}
-
 	public void setAnzahlMaschinen(int anzahlMaschinen) {
 		this.anzahlMaschinen = anzahlMaschinen;
 	}
@@ -476,12 +554,12 @@ public class Population {
 
 	public String toString() {
 		String s = "";
-		 s += "populationsgroesse: " + anzahlLoesungen + "\n";
-		
-		  s += "Pheromonmatrix: \n"; for (int i = 0; i < anzahlJobs; i++) { for (int j
-		  = 0; j < anzahlJobs; j++) { s += pheromonmatrix[i][j] + " "; } s += "\n"; }
-		 
+		s += "populationsgroesse: " + anzahlLoesungen + "\n";
 
+		/*
+		 * s += "Pheromonmatrix: \n"; for (int i = 0; i < anzahlJobs; i++) { for (int j
+		 * = 0; j < anzahlJobs; j++) { s += pheromonmatrix[i][j] + " "; } s += "\n"; }
+		 */
 		if (loesungenInPopulation[ermittleBesteLoesunginPopulation(loesungenInPopulation)] != null) {
 			s += "beste Lösung der aktuellen Iteration: " + besteLoesungIteration.berechneTFT();
 			s += "\n";

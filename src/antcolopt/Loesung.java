@@ -9,6 +9,7 @@ public class Loesung {
 	int[][] ausfuehrungszeiten;
 	int makespan = 0;
 	int alter = 0;
+	private int letztesTft;
 
 	public Loesung(int alter, int anzahlJobs, int anzahlMaschinen, int[][] ausfuehrungszeiten) {
 		jobreihenfolge = new int[anzahlJobs];
@@ -34,10 +35,12 @@ public class Loesung {
 		for (int i = 0; i < leavingTime[0].length; i++) {
 			tft = tft + leavingTime[leavingTime.length - 1][i];
 		}
+		this.letztesTft = tft;
 		return tft;
 	}
 
-	/** Berechnet den Zeitpunkt, an dem die Jobs die letzte Maschine verlassen
+	/**
+	 * Berechnet den Zeitpunkt, an dem die Jobs die letzte Maschine verlassen
 	 * 
 	 * @param leavingTime Zeitpunkte, an denen die einzelne Jobs fertiggestellt
 	 *                    wurden
@@ -51,8 +54,9 @@ public class Loesung {
 		}
 	}
 
-	/**Leaving times werden berechnet, bei denen
-	 * eventuelle Wartezeiten zusätzlich berücksichtigt werden muessen
+	/**
+	 * Leaving times werden berechnet, bei denen eventuelle Wartezeiten zusätzlich
+	 * berücksichtigt werden muessen
 	 * 
 	 * @param leavingTime Zeitpunkte, an denen die Jobs die Maschine verlassen
 	 */
@@ -69,8 +73,9 @@ public class Loesung {
 		}
 	}
 
-	/** Leavingt imes werden berechnet, bei denen
-	 * Wartezeiten  noch nicht beruecksichtigt werden muessen
+	/**
+	 * Leavingt imes werden berechnet, bei denen Wartezeiten noch nicht
+	 * beruecksichtigt werden muessen
 	 * 
 	 * @param leavingTime Zeitpunkte, an denen die Jobs die Maschine verlassen
 	 */
@@ -112,6 +117,10 @@ public class Loesung {
 
 	public void setAlter(int alter) {
 		this.alter = alter;
+	}
+
+	public int getLetztesTft() {
+		return letztesTft;
 	}
 
 	@Override

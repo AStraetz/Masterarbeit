@@ -23,13 +23,12 @@ public class Main {
 				Problem.anzahlMaschinen = Problem.anzahlMaschinenArray[y];
 				Problem.anzahlJobs = Problem.anzahlJobsArray[y];
 				Problem.ausfuehrungszeiten0 = new int[10][Problem.anzahlMaschinen][Problem.anzahlJobs];
-				Problem.eliteUpdateGewicht=Problem.anzahlJobs/20.0;
-				Problem.anzahlLokaleSuche = Problem.anzahlJobs*10;
+				Problem.anzahlLokaleSuche = Problem.anzahlJobs*1000;
 				String dateiName = Problem.dateiname[y];
 				Reader reader = new Reader();
 				reader.ladeProbleminstanzen(dateiName);
 				reader.ladeBestwerteTFT(Problem.dateiBewerteTft);
-				//Problem.berechneGesamtBearbeitungsZeitJobs();
+				Problem.berechneGesamtBearbeitungsZeitJobs();
 				
 				for (int z = 0; z < 1; z++) {
 					Problem.probleminstanz = z;
@@ -37,26 +36,31 @@ public class Main {
 
 						Problem.wartekapazitaet = j;
 						Problem.berechneDueDates();
+						Problem.PHEROMON_UPDATE_MENGE = 
+								(Problem.PHEROMON_MAX - Problem.pheromon_inital)
+								/ (double) Problem.populationsgroesse;
 					//for(int f = 4; f<7;f++) {
 						
 						//Problem.nachbarschaftsGroesse = f;
 						//Problem.eliteUpdateGewicht =  f;
 						//for(int o = 7; o<10;o++) {
 							//	Problem.anzahlLokaleSuche = o *Problem.anzahlJobs/2;
-						for (int l = 0; l < 10; l++) {
-							Problem.generiereTftHeristikLoesung();
+						for (int l = 0; l < 1; l++) {
+							//Problem.generiereTftHeristikLoesung();
 							Population population = new Population();
 							final long timeStart = System.currentTimeMillis();
-							for (int i = 0; i < 10000; i++) {
+							long timeEnd = System.currentTimeMillis();
+							for(int r = 0; r < 10000000; r++){
 								population.generiereLoesung();
-								final long timeEnd = System.currentTimeMillis();
-								bw.write(population.getIterationsanzahl() + "; " + (timeEnd - timeStart) + "; ");
-								for(Loesung loesung: population.getLoesungenInSuperPopulation()) {
+								timeEnd = System.currentTimeMillis();
+								System.out.println(population.getLoesungenInSuperPopulation().size());
+								bw.write(population.getIterationsanzahl() + "; " + (timeEnd - timeStart) + "; " + population.getLoesungenInSuperPopulation().size()+ "; " );
+								for(Loesung loesung: population.getLoesungenInSuperPopulation()) {         
 									bw.write(loesung.berechneTFT() + "; " + loesung.getMeanTardiness() + "; ");
 								}
 								bw.write("\n");
 								
-								if ((timeEnd - timeStart) > 10000000) {//Problem.berechnungszeit[y]) {
+								if ((timeEnd - timeStart) > Problem.berechnungszeit[y]) {
 									String s = "";
 									for (int k = 0; k < Problem.anzahlJobs; k++) {
 										s += population.getEliteloesung().getJobreihenfolge()[k] + ", ";
@@ -74,12 +78,12 @@ public class Main {
 							summe = summe + tft;
 						}
 						
-						double gemitteltertft = (summe / 10);
+						double gemitteltertft = (summe); /// 10);
 						double besterBekannterTft = Problem.bestWerteTft[y*10+z][j-1];
 						double rpd = ((gemitteltertft- besterBekannterTft)/besterBekannterTft) * 100;
 						bw2.write("LokaleSuche: " + Problem.anzahlLokaleSuche + " EliteGewicht: " + Problem.eliteUpdateGewicht + "gewichteter bester TFT bei Jobanzahl: " + Problem.anzahlJobs + " Maschinenanzahl: "
 								+ Problem.anzahlMaschinen + " Instanz " + (z+1) + ", Wartekapazitaet " + j + ": "
-								+ (summe / 10) + " RPD:" + rpd +" "+ besterBekannterTft);
+								+ gemitteltertft + " RPD:" + rpd +" "+ besterBekannterTft);
 						bw2.write("\n");
 						}
 						}

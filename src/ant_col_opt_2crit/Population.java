@@ -34,6 +34,7 @@ public class Population {
 	int tftEliteLoesung;
 	int besterTftInPopulation;
 	private Loesung aktuellAusgewaehlteLoesung;
+	private boolean bessereLoesungGefunden = false;
 
 	public Loesung getAktuellAusgewaehlteLoesung() {
 		return aktuellAusgewaehlteLoesung;
@@ -68,7 +69,7 @@ public class Population {
 		tftEliteLoesung = eliteloesung.berechneTFT();
 		loesungenInSuperPopulation.add(eliteloesung);
 		
-		System.out.println(toString());
+		//System.out.println(toString());
 
 	}
 
@@ -124,7 +125,7 @@ public class Population {
 			if(testeAufDominierung(loesung, loesungInSP) == 1) 
 			{iterator.remove();
 			anzahlLoesungen--;}
-			else {if((testeAufDominierung(loesung, loesungInSP) == -1) || (loesung.getJobreihenfolge().equals(loesungInSP.getJobreihenfolge())))
+			else {if((testeAufDominierung(loesung, loesungInSP) == -1) || (Arrays.equals(loesung.getJobreihenfolge(),loesungInSP.getJobreihenfolge())))
 			{return;}}
 		}
 		loesungenInSuperPopulation.add(loesung);
@@ -135,7 +136,7 @@ public class Population {
 		for(int j = 0; j<loesungen.length;j++) {
 		for (int i = 0; i < pheromonmatrix.length; i++) {
 			pheromonmatrix[i][loesungen[j].jobreihenfolge[i]] = pheromonmatrix[i][loesungen[j].jobreihenfolge[i]]
-					+ (Problem.updategewicht / Problem.anzahlJobs);
+					+ Problem.PHEROMON_UPDATE_MENGE;
 		}
 		}
 		}
@@ -144,7 +145,7 @@ public class Population {
 		for(int j = 0; j<loesungen.length;j++) {
 			for (int i = 0; i < pheromonmatrix.length; i++) {
 				pheromonmatrix[i][loesungen[j].jobreihenfolge[i]] = pheromonmatrix[i][loesungen[j].jobreihenfolge[i]]
-						- (Problem.updategewicht / Problem.anzahlJobs);
+						- Problem.PHEROMON_UPDATE_MENGE;
 			}
 			}
 			}
@@ -244,23 +245,26 @@ public class Population {
 			}
 
 			loesungen[j].jobreihenfolge = ameisen[j].getBesuchteKnoten();
-
 		}
+			
+			if (Problem.lokaleSuche) {
+				for (int j = 0; j < loesungen.length; j++) {
+					loesungen[j]=lokaleSucheBestChangeFound(loesungen[j], Problem.anzahlLokaleSuche);}
+			}
+			
+			
+			
 		
 		for (int i = 0; i < loesungen.length; i++) {
 			testeLoesungFuerSuperpopulation(loesungen[i]);
 		}
 
 		
-		if (Problem.lokaleSuche == true) {
+		
 
 			
 			
 
-			
-			wendeLokaleSucheAn(loesungen, Problem.anzahlLokaleSuche);
-
-		}
 
 
 		System.out.println(toString());
@@ -282,10 +286,10 @@ public class Population {
 		int tardiness1 = loesung1.getMeanTardiness();
 		int tft2 = loesung2.berechneTFT();
 		int tardiness2 = loesung2.getMeanTardiness();
-		if ((tft1 < tft2) && (tardiness1 < tardiness2)) {
+		if ((tft1 < tft2) && (tardiness1 <= tardiness2) || (tft1 <= tft2) && (tardiness1 < tardiness2)) {
 			return 1;
 		}
-		if ((tft2 < tft1) && (tardiness2 < tardiness1)) {
+		if ((tft2 < tft1) && (tardiness2 <= tardiness1) || (tft1 <= tft2) && (tardiness1 < tardiness2) ) {
 			return -1;
 		}
 		return 0;
@@ -305,30 +309,107 @@ public class Population {
 		this.tftEliteLoesung = tftEliteLoesung;
 	}
 
-	private void wendeLokaleSucheAn(Loesung[] loesungen, int k) {
+	/*private void wendeLokaleSucheAn(Loesung[] loesungen, int k) {
 		for (int l = 0; l < k; l++) {
 			if ((l % Problem.anzahlJobs == 0) && (l > 0)) {
 				java.util.Collections.shuffle(list);
 				java.util.Collections.shuffle(list2);
 			}
-			for (int i = 0; i < loesungen.length; i++) {
+			//for (int i = 0; i < loesungen.length; i++) {
 
 				// int zufall = (int) (Problem.anzahlJobs * Math.random());
 
-				loesungen[i] = lokaleSucheInsertion(loesungen[i], list.get(l % Problem.anzahlJobs));
+			//	loesungen[i] = lokaleSucheInsertion(loesungen[i], list.get(l % Problem.anzahlJobs));
 				// zufall = (int) (Problem.anzahlJobs * Math.random());
-				loesungen[i] = swapSearch(loesungen[i], list2.get(l % Problem.anzahlJobs));
+			//	loesungen[i] = swapSearch(loesungen[i], list2.get(l % Problem.anzahlJobs));
 
 				// for (int j = 0; j <10; j++) {
 				// int zufall = (int) (Problem.anzahlJobs * Math.random());
 				// loesungen[i] = swapSearch(loesungen[i], zufall);
 				// zufall = (int) (Problem.anzahlJobs * Math.random());
 				// }
+			//}
+			
+			for (int a = 0; a < loesungen.length; a++) {
+				loesungen[a] = lokaleSucheBestChangeFound(loesungen[a], Problem.anzahlLokaleSuche);
 			}
 		}
 	}
+	*/
+	private Loesung lokaleSucheBestChangeFound(Loesung loesung, int k) {
+			for (int l = 0; l < k; l++) {
+				if (l % Problem.anzahlJobs == 0) {
+					if ((bessereLoesungGefunden == false) && (l > 1)) {
+						return loesung;
+					}
+					java.util.Collections.shuffle(list);
+					java.util.Collections.shuffle(list2);
+					bessereLoesungGefunden = false;
+				}
 
-	public Loesung lokaleSucheInsertion(Loesung loesung, int index) {
+				loesung = lokaleSucheInsertion(loesung, list.get(l % Problem.anzahlJobs));
+				loesung = swapSearch(loesung, list2.get(l % Problem.anzahlJobs));
+			}
+		return loesung;
+		}
+	
+	private Loesung lokaleSucheInsertion(Loesung loesung, int index) {
+		int besterTft = loesung.berechneTFT();
+		int tftTemp = 0;
+		int besterTardiness = loesung.getMeanTardiness();
+		int TardinessTemp = 0;
+		Loesung besteLoesung = loesung;
+        Loesung tempLoesung = new Loesung(loesung.getAlter());
+
+		for (int i = 0; i < loesung.getJobreihenfolge().length; i++) {
+
+			tempLoesung = insertJob(loesung, index, i);
+			tftTemp = tempLoesung.berechneTFT();
+			TardinessTemp = tempLoesung.getMeanTardiness();
+			if (((tftTemp < besterTft) && (TardinessTemp <= besterTardiness)) || ((tftTemp <= besterTft) && (TardinessTemp < besterTardiness))) {
+			//if (tftTemp < besterTft){
+				bessereLoesungGefunden = true;
+				besteLoesung = tempLoesung;
+				besterTft = tftTemp;
+
+			}
+
+		}
+		return besteLoesung;
+	}
+	
+	private Loesung swapSearch(Loesung loesung, int index) {
+
+		int besterTft = loesung.berechneTFT();
+		int tftTemp = 0;
+		int besterTardiness = loesung.getMeanTardiness();
+		int TardinessTemp = 0;
+		Loesung besteLoesung = loesung;
+
+		Loesung tempLoesung = new Loesung(loesung.getAlter());
+
+		for (int i = 0; i < loesung.getJobreihenfolge().length; i++) {
+
+			tempLoesung = swapJob(loesung, index, i);
+			tftTemp = tempLoesung.berechneTFT();
+			TardinessTemp = tempLoesung.getMeanTardiness();
+			if (((tftTemp < besterTft) && (TardinessTemp <= besterTardiness)) || ((tftTemp <= besterTft) && (TardinessTemp < besterTardiness))) {
+			//if (tftTemp < besterTft){
+				bessereLoesungGefunden = true;
+				besteLoesung = tempLoesung;
+				besterTft = tftTemp;
+
+			}
+
+		}
+
+		return besteLoesung;
+	}
+
+	
+	
+
+	/*public Loesung lokaleSucheInsertion(Loesung loesung, int index) {
 		int besterTft = loesung.berechneTFT();
 		int besteTardiness = loesung.getMeanTardiness();
 		int tftTemp = 0;
@@ -352,6 +433,7 @@ public class Population {
 		}
 		return besteLoesung;
 	}
+	*/
 
 	public int findeIndexJob(Loesung loesung, int job) {
 		for (int i = 0; i < Problem.anzahlJobs; i++) {
@@ -362,7 +444,7 @@ public class Population {
 		return 999;
 	}
 
-	public Loesung swapSearch(Loesung loesung, int index) {
+	/*public Loesung swapSearch(Loesung loesung, int index) {
 
 		int besterTft = loesung.berechneTFT();
 		int besteTardiness = loesung.getMeanTardiness();
@@ -387,7 +469,7 @@ public class Population {
 
 		return besteLoesung;
 	}
-
+*/
 	public Loesung insertJob(Loesung loesung, int jobPosition, int insertPosition) {
 		Loesung loesung2 = new Loesung(loesung.getAlter());
 		loesung2.jobreihenfolge = Arrays.copyOf(loesung.getJobreihenfolge(), loesung.getJobreihenfolge().length);

@@ -207,7 +207,16 @@ public class Population {
 
 	public Loesung generiereLoesung() {
 		Collections.sort(loesungenInSuperPopulation, new LoesungComparatorByTft());
-		
+		if(Problem.zufPop) {
+		Random r = new Random();
+		int zufallPop = r.nextInt(3);
+		if(zufallPop == 0){Problem.populationsgroesse = 1;}
+		if(zufallPop == 1){Problem.populationsgroesse = 3;}
+		if(zufallPop == 2){Problem.populationsgroesse = 5;}
+		Problem.PHEROMON_UPDATE_MENGE = 
+				(Problem.PHEROMON_MAX - Problem.pheromon_inital)
+				/ (double) Problem.populationsgroesse;
+		}
 		Loesung[] loesungenFuerMatrixBerechnung;
 		if(loesungenInSuperPopulation.size()<=Problem.populationsgroesse) {
 			aktuellAusgewaehlteLoesung = loesungenInSuperPopulation.get(loesungenInSuperPopulation.size()/2);
@@ -231,10 +240,12 @@ public class Population {
 		}
 		}
 		berechneMatrix(loesungenFuerMatrixBerechnung);
+		Random r = new Random();
+		int indexKand = r.nextInt(loesungenInSuperPopulation.size());
 		Ameise[] ameisen = new Ameise[Problem.anzahlAmeisen];
 		Loesung[] loesungen = new Loesung[Problem.anzahlAmeisen];
 		for (int i = 0; i < Problem.anzahlAmeisen; i++) {
-			ameisen[i] = new Ameise(aktuellAusgewaehlteLoesung);
+			ameisen[i] = new Ameise(loesungenInSuperPopulation.get(indexKand));
 			loesungen[i] = new Loesung(iterationsanzahl);
 		}
 
@@ -267,7 +278,7 @@ public class Population {
 
 
 
-		System.out.println(toString());
+	//System.out.println(toString());
 		setzeMatrixZurueck(loesungenFuerMatrixBerechnung);
 		iterationsanzahl++;
 		return aktuellAusgewaehlteLoesung;

@@ -27,7 +27,7 @@ public class Problem {
 	static boolean lokaleSuche = true;
 	static String[] dateiname = {"D:\\tailard\\tai20_5.txt","D:\\tailard\\tai20_10.txt","D:\\tailard\\tai20_20.txt","D:\\tailard\\tai50_5.txt","D:\\tailard\\tai50_10.txt","D:\\tailard\\tai50_20.txt","D:\\tailard\\tai100_5.txt","D:\\tailard\\tai100_10.txt","D:\\tailard\\tai100_20.txt"};
 	static boolean summenregel = false;
-	static boolean nachbarschaftsregel = false;
+	static boolean nachbarschaftsregel = true;
 	static double q0 = 0.9;
 	static boolean benutzeq0= false;
 	static int[] berechnungszeit = {6000,12000,24000,37500,75000,150000,150000,300000,600000};
@@ -36,7 +36,7 @@ public class Problem {
 	static int anzahlLokaleSuche = 10000;
 	static double[][] bestWerteTft = new double[90][4];
 	static String dateiBewerteTft = "D:\\tailard\\Bestwerte_TFT.csv";
-	static int nachbarschaftsGroesse = 5;
+	static int nachbarschaftsGroesse = 10;
 	static int[][][][] dueDates = new int[9][10][4][100];
 	static int Problemklasse = 0;
 	static int[][] makespanBestwerte = new int[9][10];
@@ -46,7 +46,7 @@ public class Problem {
 	public static double elite_pheromonzuwachs;
 	public static double pheromon_inital = 1.0/anzahlJobs;
 	static double PHEROMON_UPDATE_MENGE;
-	
+	static boolean zufPop = false;
 
 	public static double getBeta() {
 		return beta;

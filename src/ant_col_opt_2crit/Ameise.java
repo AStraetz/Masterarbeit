@@ -140,7 +140,7 @@ public class Ameise {
 			// Collections.sort(erlaubteKnoten);
 			updateWahrscheinlichkeiten(matrix);
 			// System.out.println(toString());
-			for (Object knoten : erlaubteKnoten) {
+			//for (Object knoten : erlaubteKnoten) {
 				// System.out.println(knoten);
 				double summe = 0;
 				double zufallszahl = Math.random();
@@ -159,7 +159,7 @@ public class Ameise {
 					}
 				}
 			}
-		}
+		//}
 
 	}
 
